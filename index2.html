@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <style>
@@ -8,7 +7,6 @@
             font-family: "Lato", sans-serif;
         }
 
-        /* Sidebar Styles */
         .sidebar {
             height: 100%;
             width: 0;
@@ -61,254 +59,276 @@
             padding: 16px;
         }
 
-        table,
-        th,
-        td {
+        table, th, td {
             border: 1px solid black;
             border-collapse: collapse;
-            max-width: 100px; /* Specify your maximum width */
-            overflow-wrap: break-word; /* Break long words */
-            white-space: normal; /* Allow text to wrap */
-            word-wrap: break-word; /* Older browsers support */
-            height: auto; /* Allow height to adjust based on content */
-            padding: 8px; /* Padding for better spacing */
+        }
+
+        table {
+            margin: 0 auto; /* Center the table */
+            width: auto; /* Adjust width to content */
         }
 
         th {
-            background-color: lightblue;
+            background-color: lightblue; /* Consistent header background */
         }
 
         td:hover {
-            background-color: lightyellow;
+            background-color: lightyellow; /* Hover effect */
         }
 
         @media screen and (max-height: 450px) {
-            .sidebar {
-                padding-top: 15px;
-            }
-
-            .sidebar a {
-                font-size: 18px;
-            }
+            .sidebar {padding-top: 15px;}
+            .sidebar a {font-size: 18px;}
         }
     </style>
 </head>
-
 <body>
 
-    <div id="mySidebar" class="sidebar">
-        <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-        <h3 style="color: #818181; padding-left: 32px;">Edit Cell</h3>
+<div id="mySidebar" class="sidebar">
+    <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
+    <h3 style="color: #818181; padding-left: 32px;">Edit Cell</h3>
+    
+    <label for="tableSelect" style="color: #818181; padding-left: 32px;">Select Table:</label>
+    <select id="tableSelect" style="margin-left: 32px;">
+        <option value="1">Table 1</option>
+        <option value="2">Table 2</option>
+    </select><br><br>
 
-        <label for="tableSelect" style="color: #818181; padding-left: 32px;">Select Table:</label>
-        <select id="tableSelect" style="margin-left: 32px;">
-            <option value="1">Table 1</option>
-            <option value="2">Table 2</option>
-        </select><br><br>
+    <label for="cellRow" style="color: #818181; padding-left: 32px;">Row (0-5):</label>
+    <input type="number" id="cellRow" min="0" max="5"><br>
+    
+    <label for="cellCol" style="color: #818181; padding-left: 32px;">Column (0-9):</label>
+    <input type="number" id="cellCol" min="0" max="9"><br>
 
-        <label for="rowSelect" style="color: #818181; padding-left: 32px;">Select Row:</label>
-        <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
+    <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
+    <input type="text" id="cellText"><br>
 
-        <label for="colSelect" style="color: #818181; padding-left: 32px;">Select Column:</label>
-        <select id="colSelect" style="margin-left: 32px;"></select><br><br>
+    <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
+    <select id="cellColor">
+        <option value="">Select color</option>
+        <option value="red">Red</option>
+        <option value="yellow">Yellow</option>
+        <option value="green">Green</option>
+    </select><br><br>
 
-        <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
-        <input type="text" id="cellText"><br>
+    <button onclick="editCell()" style="margin-left: 32px;">Edit Cell</button>
+</div>
 
-        <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
-        <select id="cellColor">
-            <option value="">Select color</option>
-            <option value="red">Red</option>
-            <option value="yellow">Yellow</option>
-            <option value="green">Green</option>
-        </select><br><br>
+<div id="main">
+    <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>  
+    <h2 style="text-align: center;">FD Shifts Days Status</h2>
 
-        <button onclick="editCell()" style="margin-left: 32px;">Edit Cell</button>
-    </div>
+    <p style="text-align: center;">Shift period from January 10 to 18</p>
 
-    <div id="main">
-        <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>
-        <h2 style="text-align: center;">FD Shifts Days Status</h2>
+    <table id="shiftTable1">
+        <colgroup>
+            <col span="2" style="background-color: yellow">
+            <col span="5" style="background-color: green">
+            <col span="3" style="background-color: orange">
+        </colgroup>
+        <tr>
+            <th> </th>
+            <th>10-1</th>
+            <th>11-1</th>
+            <th>12-1</th>
+            <th>13-1</th>
+            <th>14-1</th>
+            <th>15-1</th>
+            <th>16-1</th>
+            <th>17-1</th>
+            <th>18-1</th>    
+        </tr>
+        
+        <tr>
+            <td style="background-color: lightblue;">LL</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">LM</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td style="background-color: lightgreen;">ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">LA</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td style="background-color: pink;">ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">CO</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">HE</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+    </table>
 
-        <p style="text-align: center;">Shift period from January 10 to 18</p>
+    <p style="text-align: center;">Shift period from January 19 to January 27</p>
 
-        <table id="shiftTable1" onclick="handleTableClick(event)">
-            <colgroup>
-                <col span="2" style="background-color: yellow">
-                <col span="5" style="background-color: green">
-                <col span="3" style="background-color: orange">
-            </colgroup>
-            <tr>
-                <th></th>
-                <th>10-1</th>
-                <th>11-1</th>
-                <th>12-1</th>
-                <th>13-1</th>
-                <th>14-1</th>
-                <th>15-1</th>
-                <th>16-1</th>
-                <th>17-1</th>
-                <th>18-1</th>
-            </tr>
-            <!-- Table Rows -->
-            <tr>
-                <td style="background-color: lightblue;">LL</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LM</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="background-color: lightgreen;">ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LA</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="background-color: pink;">ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">CO</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">HE</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-        </table>
+    <table id="shiftTable2">
+        <colgroup>
+            <col span="2" style="background-color: yellow">
+            <col span="3" style="background-color: green">
+        </colgroup>
+        <tr>
+            <th> </th>
+            <th>19-1</th>
+            <th>20-1</th>
+            <th>21-1</th>
+            <th>22-1</th>
+            <th>23-1</th>
+            <th>24-1</th>
+            <th>25-1</th>
+            <th>26-1</th>
+            <th>27-1</th>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">LL</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td style="background-color: lightcoral;">ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">LM</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">LA</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">CO</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+        <tr>
+            <td style="background-color: lightblue;">HE</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+            <td>ok</td>
+        </tr>
+    </table>
+</div>
 
-        <p style="text-align: center;">Shift period from January 19 to January 27</p>
+<script>
+let isOpen = false; // Track the sidebar state
 
-        <table id="shiftTable2" onclick="handleTableClick(event)">
-            <colgroup>
-                <col span="2" style="background-color: yellow">
-                <col span="3" style="background-color: green">
-            </colgroup>
-            <tr>
-                <th></th>
-                <th>19-1</th>
-                <th>20-1</th>
-                <th>21-1</th>
-                <th>22-1</th>
-                <th>23-1</th>
-                <th>24-1</th>
-                <th>25-1</th>
-                <th>26-1</th>
-                <th>27-1</th>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LL</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="max-width: 100px;">This is a very long comment that should wrap in the cell.</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LM</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-        </table>
-    </div>
+function toggleNav() {
+    if (isOpen) {
+        closeNav();
+    } else {
+        openNav();
+    }
+}
 
-    <script>
-        // JavaScript functions for sidebar and cell editing  
-        function toggleNav() {
-            const sidebar = document.getElementById("mySidebar");
-            if (sidebar.style.width === "250px") {
-                sidebar.style.width = "0";
-                document.getElementById("main").style.marginLeft = "0";
-            } else {
-                sidebar.style.width = "250px";
-                document.getElementById("main").style.marginLeft = "250px";
-            }
-        }
+function openNav() {
+    document.getElementById("mySidebar").style.width = "250px";
+    document.getElementById("main").style.marginLeft = "250px";
+    isOpen = true; // Update the state  
+}
 
-        function closeNav() {
-            document.getElementById("mySidebar").style.width = "0";
-            document.getElementById("main").style.marginLeft = "0";
-        }
+function closeNav() {
+    document.getElementById("mySidebar").style.width = "0";
+    document.getElementById("main").style.marginLeft= "0";
+    isOpen = false; // Update the state  
+}
 
-        function handleTableClick(event) {
-            const cell = event.target;
-            if (cell.tagName === 'TD') {
-                const rowSelect = document.getElementById('rowSelect');
-                const colSelect = document.getElementById('colSelect');
-                
-                rowSelect.value = cell.parentNode.cells[0].innerText; // Get row identifier  
-                colSelect.value = cell.innerText; // Get cell content (for simplicity)
-            }
-        }
+function editCell() {
+    const tableSelect = document.getElementById('tableSelect').value;
+    const row = parseInt(document.getElementById('cellRow').value);
+    const col = parseInt(document.getElementById('cellCol').value);
+    const text = document.getElementById('cellText').value;
+    const color = document.getElementById('cellColor').value;
 
-        function editCell() {
-            const selectedRow = document.getElementById('rowSelect').value;
-            const selectedCol = document.getElementById('colSelect').value;
-            const cellText = document.getElementById('cellText').value;
-            const cellColor = document.getElementById('cellColor').value;
+    let table = document.getElementById('shiftTable1');
 
-            const tableId = document.getElementById('tableSelect').value;
-            const table = document.getElementById(`shiftTable${tableId}`);
-            
-            const rowIndex = Array.from(table.rows).findIndex(row => row.cells[0].innerText === selectedRow);
-            const colIndex = Array.from(table.rows[0].cells).findIndex(cell => cell.innerText === selectedCol);
+    // Select the appropriate table based on user choice  
+    if (tableSelect === "2") {
+        table = document.getElementById('shiftTable2');
+    }
 
-            if (rowIndex > 0 && colIndex > 0) { // Ensure valid row and column  
-                const cell = table.rows[rowIndex].cells[colIndex];
-                cell.innerText = cellText;
-                cell.style.backgroundColor = cellColor;
-            } else {
-                alert("Invalid selection!");
-            }
-        }
-    </script>
+    // Check if the row and column are within valid ranges  
+    if (row >= 0 && row <= 5 && col >= 0 && col <= 9) {
+        const cell = table.rows[row].cells[col];
+        if (text) cell.innerText = text; // Update cell text  
+        if (color) cell.style.backgroundColor = color; // Update cell background color  
+    }
+}
+</script>
+
 </body>
-
 </html>
