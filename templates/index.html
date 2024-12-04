@@ -77,6 +77,15 @@
             background-color: lightblue;
         }
 
+        td {
+            max-width: 80px; /* Establece un ancho máximo */
+            white-space: pre-wrap; /* Permite texto multilinea */
+            word-wrap: break-word; /* Permite el ajuste de palabras largas */
+            overflow: hidden; /* Oculta el desbordamiento */
+            padding: 2px; /* Espaciado interno */
+            text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es demasiado largo */
+        }
+
         td:hover {
             background-color: lightyellow;
         }
@@ -97,25 +106,26 @@
 
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-        <h3 style="color: #818181; padding-left: 32px;">Edit Cell</h3>
+        <h3 style="color: #818181; padding-left: 32px;">Shift Day</h3>
 
         <label for="tableSelect" style="color: #818181; padding-left: 32px;">Select Table:</label>
         <select id="tableSelect" style="margin-left: 32px;">
             <option value="1">Table 1</option>
             <option value="2">Table 2</option>
-        </select><br><br>
+        </select><br><br>   
 
-        <label for="rowSelect" style="color: #818181; padding-left: 32px;">Select Row:</label>
+        <label for="rowSelect" style="color: #818181; padding-left: 32px;">FD building:</label>
         <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
 
-        <label for="colSelect" style="color: #818181; padding-left: 32px;">Select Column:</label>
+        <label for="colSelect" style="color: #818181; padding-left: 32px;">Shift Day:</label>
         <select id="colSelect" style="margin-left: 32px;"></select><br><br>
 
         <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
-        <input type="text" id="cellText"><br>
+        <input type="text" id="cellText"><br><br>
 
         <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
-        <select id="cellColor">
+        
+        <select id="cellColor" style="margin-left: 32px;">
             <option value="">Select color</option>
             <option value="red">Red</option>
             <option value="yellow">Yellow</option>
