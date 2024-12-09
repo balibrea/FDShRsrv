@@ -67,6 +67,9 @@
             border: 1px solid black;
             border-collapse: collapse;
         }
+        .green { background-color: green; color: white; }
+        .red { background-color: red; color: white; }
+        .yellow { background-color: yellow; }
 
         table {
             margin: 0 auto;
@@ -139,170 +142,56 @@
         <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>
         <h2 style="text-align: center;">FD Shifts Days Status</h2>
 
-        <p style="text-align: center;">Shift period from January 10 to 18</p>
+                
+        {% for t in range(table_cnt) %}
+        <p style="text-align: center;">Shift period from {{ dates[t] }}</p>
 
-        <table id="shiftTable1" onclick="handleTableClick(event)">
+        <table id="shiftTable{{t}}" onclick="handleTableClick(event)">
             <colgroup>
-                <col span="2" style="background-color: yellow">
-                <col span="5" style="background-color: green">
-                <col span="3" style="background-color: orange">
-            </colgroup>
-            <tr>
-                <th> </th>
-                <th>10-1</th>
-                <th>11-1</th>
-                <th>12-1</th>
-                <th>13-1</th>
-                <th>14-1</th>
-                <th>15-1</th>
-                <th>16-1</th>
-                <th>17-1</th>
-                <th>18-1</th>
-            </tr>
-
-            <!-- Table Rows -->
-            <tr>
-                <td style="background-color: lightblue;">LL</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LM</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="background-color: lightgreen;">ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LA</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="background-color: pink;">ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">CO</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">HE</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-        </table>
-
-        <p style="text-align: center;">Shift period from January 19 to January 27</p>
-
-        <table id="shiftTable2" onclick="handleTableClick(event)">
-            <colgroup>
-                <col span="2" style="background-color: yellow">
+                col span="2" style="background-color: yellow">
                 <col span="3" style="background-color: green">
             </colgroup>
+
+            <thead>
+                <tr>
+                    <th> </th>
+    
+                {% if t == 0 %}
+    
+                    {% for i in range(MAX_COL)%}
+    
+                    <th> {{days[i]}} </th>
+    
+                    {% endfor %}
+    
+                {% else %}
+    
+                    {% for i in days[MAX_COL:] %}
+    
+                    <th> {{i}} </th>
+    
+                    {% endfor %}
+    
+                {% endif %}
+    
+                </tr>
+            </thead>
+            <tbody>
+            {% for shift, statuses in data.items() %}
             <tr>
-                <th> </th>
-                <th>19-1</th>
-                <th>20-1</th>
-                <th>21-1</th>
-                <th>22-1</th>
-                <th>23-1</th>
-                <th>24-1</th>
-                <th>25-1</th>
-                <th>26-1</th>
-                <th>27-1</th>
+                <td>{{ shift }}</td>
+                {% for status in statuses %}
+                    <td class="{{ status[1] }}">{{ status[0] }}</td>  {# status[0] is the label, status[1] is the color #}
+                {% endfor %}
             </tr>
-            <tr>
-                <td style="background-color: lightblue;">LL</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td style="background-color: lightcoral;">ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LM</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">LA</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">CO</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
-            <tr>
-                <td style="background-color: lightblue;">HE</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-                <td>ok</td>
-            </tr>
+            {% endfor %}
+            </tbody>
+        
         </table>
+
+        {% endfor %}
+
+        
     </div>
 
     <script>
