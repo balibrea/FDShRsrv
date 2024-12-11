@@ -1,11 +1,12 @@
 from flask import Flask, render_template
 from datetime import datetime, timedelta
 
+
 app = Flask(__name__)
 
-START = "2024-11-20"
-END = "2024-12-7"
-MAX_COL = 10
+START = "2024-12-20"
+END = "2025-01-7"
+MAX_COL = 9
 
 table_cnt = 1
 dates = []
@@ -75,6 +76,7 @@ def get_date_period_name(start_date, end_date):
 
 # Get days list
 days = shift_days(START, END)
+print(days)
 
 # Calculate the number of tables
 if len(days) > MAX_COL:

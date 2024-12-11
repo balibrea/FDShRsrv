@@ -22,51 +22,29 @@
 </head>
 <body>
     <h1>Shift Data Tables</h1>
-    
-    <!-- First Table with X columns -->
-    <h2>Table 1: First {{ x }} Columns</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Shift</th>
-                {% for col in col_names[:x] %}
-                    <th>{{ col }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for shift, statuses in shift_data.items() %}
-                <tr>
-                    <td>{{ shift }}</td>
-                    {% for status in statuses[:x] %}
-                        <td class="{{ status[1] }}">{{ status[0] }}</td>
-                    {% endfor %}
-                </tr>
-            {% endfor %}
-        </tbody>
-    </table>
 
-    <!-- Second Table with the remaining columns -->
-    <h2>Table 2: Remaining Columns</h2>
-    <table>
-        <thead>
-            <tr>
-                <th>Shift</th>
-                {% for col in col_names[x:] %}
-                    <th>{{ col }}</th>
-                {% endfor %}
-            </tr>
-        </thead>
-        <tbody>
-            {% for shift, statuses in shift_data.items() %}
+    {% for table_index in range(num_tables) %}
+        <h2>Table {{ table_index + 1 }}</h2>
+        <table>
+            <thead>
                 <tr>
-                    <td>{{ shift }}</td>
-                    {% for status in statuses[x:] %}
-                        <td class="{{ status[1] }}">{{ status[0] }}</td>
+                    <th>Shift</th>
+                    {% for col in col_names[table_index * x : (table_index + 1) * x] %}
+                        <th>{{ col }}</th>
                     {% endfor %}
                 </tr>
-            {% endfor %}
-        </tbody>
-    </table>
+            </thead>
+            <tbody>
+                {% for shift, statuses in shift_data.items() %}
+                    <tr>
+                        <td>{{ shift }}</td>
+                        {% for status in statuses[table_index * x : (table_index + 1) * x] %}
+                            <td class="{{ status[1] }}">{{ status[0] }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
 </body>
 </html>

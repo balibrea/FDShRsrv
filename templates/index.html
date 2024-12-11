@@ -68,8 +68,8 @@
             border-collapse: collapse;
         }
         .green { background-color: green; color: white; }
-        .red { background-color: red; color: white; }
-        .yellow { background-color: yellow; }
+        .red { background-color: red; color: black; }
+        .yellow { background-color: yellow; color: black;}
 
         table {
             margin: 0 auto;
@@ -146,45 +146,36 @@
         {% for t in range(table_cnt) %}
         <p style="text-align: center;">Shift period from {{ dates[t] }}</p>
 
-        <table id="shiftTable{{t}}" onclick="handleTableClick(event)">
+        <table id="shiftTable{{t+1}}" onclick="handleTableClick(event)">
             <colgroup>
-                col span="2" style="background-color: yellow">
+                <col span="2" style="background-color: lightblue">
                 <col span="3" style="background-color: green">
             </colgroup>
 
             <thead>
                 <tr>
                     <th> </th>
-    
-                {% if t == 0 %}
-    
-                    {% for i in range(MAX_COL)%}
-    
-                    <th> {{days[i]}} </th>
-    
+                    {% for col in days[t * MAX_COL : (t + 1) * MAX_COL] %}
+                        <th>{{ col }}</th>
                     {% endfor %}
-    
-                {% else %}
-    
-                    {% for i in days[MAX_COL:] %}
-    
-                    <th> {{i}} </th>
-    
-                    {% endfor %}
-    
-                {% endif %}
-    
                 </tr>
             </thead>
+
             <tbody>
-            {% for shift, statuses in data.items() %}
-            <tr>
-                <td>{{ shift }}</td>
-                {% for status in statuses %}
-                    <td class="{{ status[1] }}">{{ status[0] }}</td>  {# status[0] is the label, status[1] is the color #}
+                {% for shift, statuses in data.items() %}
+                <tr>
+                    <td>{{ shift }}</td>
+                    {% if t < 1 %}
+                    {% for status in statuses[:MAX_COL] %}
+                        <td class="{{ status[1] }}">{{ status[0] }}</td>
+                    {% endfor %}
+                    {% else %}
+                    {% for status in statuses[MAX_COL:] %}
+                        <td class="{{ status[1] }}">{{ status[0] }}</td>
+                    {% endfor %}
+                    {% endif%}
+                </tr>
                 {% endfor %}
-            </tr>
-            {% endfor %}
             </tbody>
         
         </table>
@@ -232,10 +223,11 @@
 
             if (tableSelect === "1") {
                 rowNames = ["LL", "LM", "LA", "CO", "HE"];
-                colNames = ["10-1", "11-1", "12-1", "13-1", "14-1", "15-1", "16-1", "17-1", "18-1"];
+                colNames = JSON.parse('{{ days|tojson|safe }}'); //["10-1", "11-1", "12-1", "13-1", "14-1", "15-1", "16-1", "17-1", "18-1"];
+                console.log(colNames);
             } else if (tableSelect === "2") {
                 rowNames = ["LL", "LM", "LA", "CO", "HE"];
-                colNames = ["19-1", "20-1", "21-1", "22-1", "23-1", "24-1", "25-1", "26-1", "27-1"];
+                colNames = JSON.parse('{{ days|tojson|safe }}');//["19-1", "20-1", "21-1", "22-1", "23-1", "24-1", "25-1", "26-1", "27-1"];
             }
 
             // Populate row select  
@@ -298,7 +290,15 @@
             if (rowIndex > 0 && colIndex > 0) {
                 const cell = table.rows[rowIndex].cells[colIndex];
                 if (text) cell.innerText = text; // Update cell text  
-                if (color) cell.style.backgroundColor = color; // Update cell background color  
+                if (color) cell.style.backgroundColor = color; // Update cell background color 
+                
+                // Change text color to black if background is red or yellow  
+                if (color === 'red' || color === 'yellow') {
+                    cell.style.color = 'black'; // Set text color to black  
+                } else {
+                    // Optionally reset to default or another color if other backgrounds are used  
+                    cell.style.color = ''; // Reset to default  
+                }
             }
         }
     </script>
