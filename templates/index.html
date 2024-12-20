@@ -155,9 +155,17 @@
             <thead>
                 <tr>
                     <th> </th>
-                    {% for col in days[t * MAX_COL : (t + 1) * MAX_COL] %}
-                        <th>{{ col }}</th>
-                    {% endfor %}
+                    {% if t < (table_cnt -1) %}
+                        {% for col in days[t * MAX_COL : (t + 1) * MAX_COL] %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+
+                    {% else %}
+                        {% for col in days[t * MAX_COL : ] %}
+                            <th>{{ col }}</th>
+                        {% endfor %}
+
+                    {% endif %}
                 </tr>
             </thead>
 

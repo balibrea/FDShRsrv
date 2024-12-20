@@ -76,7 +76,6 @@ def get_date_period_name(start_date, end_date):
 
 # Get days list
 days = shift_days(START, END)
-print(days)
 
 # Calculate the number of tables
 if len(days) > MAX_COL:
@@ -86,8 +85,8 @@ else:
     dates = get_date_period_name(days[0], days[-1])
 
 # DEBUG
-#print(days)
-#print(shift_data)
+print(days)
+print(shift_data)
 
 @app.route('/')
 def home():
