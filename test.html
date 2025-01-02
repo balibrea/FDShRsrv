@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FD Status Table</title>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+        }
+        th, td {
+            border: 1px solid #ccc;
+            text-align: center;
+            padding: 10px;
+        }
+        th {
+            background-color: #f4f4f4;
+        }
+        td {
+            cursor: pointer;
+        }
+        .context-menu {
+            position: absolute;
+            display: none;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+        }
+        .context-menu button:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+
+<table id="fd-status-table">
+    <thead>
+        <tr>
+            <th></th>
+            <th>11-20</th>
+            <th>11-21</th>
+            <th>11-22</th>
+            <th>11-23</th>
+            <th>11-24</th>
+            <th>11-25</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <th>LL</th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+        <tr>
+            <th>LM</th>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+            <td></td>
+        </tr>
+    </tbody>
+</table>
+
+<div id="context-menu" class="context-menu">
+    <button onclick="changeColor('red')">Red</button>
+    <button onclick="changeColor('green')">Green</button>
+    <button onclick="changeColor('yellow')">Yellow</button>
+</div>
+
+<script>
+    const table = document.getElementById('fd-status-table');
+    const contextMenu = document.getElementById('context-menu');
+    let currentCell;
+
+    // Make cells editable on double-click
+    table.addEventListener('dblclick', (e) => {
+        if (e.target.tagName === 'TD') {
+            e.target.contentEditable = true;
+            e.target.focus();
+        }
+    });
+
+    // Show context menu on right-click
+    table.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (e.target.tagName === 'TD') {
+            currentCell = e.target;
+            contextMenu.style.top = `${e.pageY}px`;
+            contextMenu.style.left = `${e.pageX}px`;
+            contextMenu.style.display = 'block';
+        }
+    });
+
+    // Hide context menu on click elsewhere
+    document.addEventListener('click', () => {
+        contextMenu.style.display = 'none';
+    });
+
+    // Change background color of the selected cell
+    function changeColor(color) {
+        if (currentCell) {
+            currentCell.style.backgroundColor = color;
+        }
+        contextMenu.style.display = 'none';
+    }
+</script>
+
+</body>
+</html>

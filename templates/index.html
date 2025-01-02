@@ -102,6 +102,52 @@
                 font-size: 18px;
             }
         }
+
+        /* Split the screen in half vertically */
+        .split {
+            height: 50%; /* Each section takes half the height */
+            width: 25%; /* Full width */
+            position: fixed;
+            z-index: 1;
+            top: 0;
+            overflow-x: hidden;
+            padding-top: 20px;
+        }
+
+        /* Control the top side */
+        .top {
+            top: 0; /* Aligns to the top */
+            background-color: #252424; /* Dark background for the top section */
+        }
+
+        /* Control the bottom side */
+        .bottom {
+            bottom: 0; /* Aligns to the bottom */
+            background-color: rgb(233, 116, 7); /* Red background for the bottom section */
+        }
+
+        /* If you want the content centered horizontally and vertically */
+        .centered {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+        }
+
+        /* Style table for bottom side */
+        #fileTable {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #fileTable td {
+            white-space: nowrap; /* Prevents word wrapping */
+            overflow: hidden; /* Hides overflow text */
+            text-overflow: ellipsis; /* Shows ellipsis for overflowed text */
+            padding: 5px; /* Adds some padding */
+            border: 1px solid #fff; /* Border color for cells */
+        }
     </style>
 </head>
 
@@ -109,40 +155,62 @@
 
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-        <h3 style="color: #818181; padding-left: 32px;">Shift Day</h3>
-
-        <label for="tableSelect" style="color: #818181; padding-left: 32px;">Select Table:</label>
-        <select id="tableSelect" style="margin-left: 32px;">
-            <option value="1">Table 1</option>
-            <option value="2">Table 2</option>
-        </select><br><br>   
-
-        <label for="rowSelect" style="color: #818181; padding-left: 32px;">FD building:</label>
-        <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
-
-        <label for="colSelect" style="color: #818181; padding-left: 32px;">Shift Day:</label>
-        <select id="colSelect" style="margin-left: 32px;"></select><br><br>
-
-        <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
-        <input type="text" id="cellText"><br><br>
-
-        <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
+            
+        <!-- Top Section for Current Information -->
+        <div style="padding: 10px; background-color: #222; color: #fff;">
+            <h3 style="color: #818181; padding-left: 32px;">Shift Day</h3>
+            <label for="rowSelect" style="color: #818181; padding-left: 32px;">FD Building:</label>
+            <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
+    
+            <label for="colSelect" style="color: #818181; padding-left: 32px;">Shift Day:</label>
+            <select id="colSelect" style="margin-left: 32px;"></select><br><br>
+    
+            <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
+            <input type="text" id="cellText"><br><br>
+    
+            <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
+            <select id="cellColor" style="margin-left: 32px;">
+                <option value="">Select color</option>
+                <option value="red">Red</option>
+                <option value="yellow">Yellow</option>
+                <option value="green">Green</option>
+            </select><br><br>
+    
+            <button onclick="editCell()" style="margin-left: 32px;">Edit Cell</button>
+        </div>
         
-        <select id="cellColor" style="margin-left: 32px;">
-            <option value="">Select color</option>
-            <option value="red">Red</option>
-            <option value="yellow">Yellow</option>
-            <option value="green">Green</option>
-        </select><br><br>
-
-        <button onclick="editCell()" style="margin-left: 32px;">Edit Cell</button>
+    
+        <!-- Bottom Section for Created Files -->
+        <div style="padding: 10px; background-color: #e7a20e; color: #050505; margin-top: 10px;">
+            <h4 style="text-align: center;">Created Files</h4>
+            <table id="fileTable" style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr>
+                        <th style="border: 1px solid #fff; padding: 5px;">File Name</th>
+                        <th style="border: 1px solid #fff; padding: 5px;">Creation Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Dynamic content will be populated here -->
+                    <tr>
+                        <td style="border: 1px solid #fff; padding: 5px;">example_file1.txt</td>
+                        <td style="border: 1px solid #fff; padding: 5px;">2023-10-01 12:00</td>
+                    </tr>
+                    <tr>
+                        <td style="border: 1px solid #fff; padding: 5px;">example_file2.txt</td>
+                        <td style="border: 1px solid #fff; padding: 5px;">2023-10-02 15:30</td>
+                    </tr>
+                    <!-- Additional rows can be added here dynamically -->
+                </tbody>
+            </table>
+        </div>
     </div>
 
     <div id="main">
         <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>
         <h2 style="text-align: center;">FD Shifts Days Status</h2>
 
-                
+
         {% for t in range(table_cnt) %}
         <p style="text-align: center;">Shift period from {{ dates[t] }}</p>
 
@@ -185,16 +253,17 @@
                 </tr>
                 {% endfor %}
             </tbody>
-        
+
         </table>
 
         {% endfor %}
 
-        
+
     </div>
 
     <script>
         let isOpen = false; // Track the sidebar state
+        let tableSelect = '1';
 
         function toggleNav() {
             if (isOpen) {
@@ -205,24 +274,24 @@
         }
 
         function openNav() {
-            document.getElementById("mySidebar").style.width = "250px";
-            document.getElementById("main").style.marginLeft = "250px";
-            isOpen = true; // Update the state  
-            populateRowAndColumnSelects(); // Populate the selects when opening  
+            document.getElementById("mySidebar").style.width = "350px";
+            document.getElementById("main").style.marginLeft = "350px";
+            isOpen = true; // Update the state
+            populateRowAndColumnSelects(); // Populate the selects when opening
         }
 
         function closeNav() {
             document.getElementById("mySidebar").style.width = "0";
             document.getElementById("main").style.marginLeft = "0";
-            isOpen = false; // Update the state  
+            isOpen = false; // Update the state
         }
 
         function populateRowAndColumnSelects() {
-            const tableSelect = document.getElementById('tableSelect').value;
+            //const tableSelect = document.getElementById('tableSelect').value;
             const rowSelect = document.getElementById('rowSelect');
             const colSelect = document.getElementById('colSelect');
 
-            // Clear previous options  
+            // Clear previous options
             rowSelect.innerHTML = "";
             colSelect.innerHTML = "";
 
@@ -238,7 +307,7 @@
                 colNames = JSON.parse('{{ days|tojson|safe }}');//["19-1", "20-1", "21-1", "22-1", "23-1", "24-1", "25-1", "26-1", "27-1"];
             }
 
-            // Populate row select  
+            // Populate row select
             rowNames.forEach(rowName => {
                 const option = document.createElement('option');
                 option.value = rowName;
@@ -246,7 +315,7 @@
                 rowSelect.appendChild(option);
             });
 
-            // Populate column select  
+            // Populate column select
             colNames.forEach(colName => {
                 const option = document.createElement('option');
                 option.value = colName;
@@ -260,55 +329,85 @@
             if (cell.tagName === 'TD') {
                 const table = cell.closest('table');
                 const tableId = table.id;
-                const tableSelect = tableId === 'shiftTable1' ? '1' : '2';
+                tableSelect = tableId === 'shiftTable1' ? '1' : '2';
 
                 const rowName = table.rows[cell.parentNode.rowIndex].cells[0].innerText;
                 const colName = table.rows[0].cells[cell.cellIndex].innerText;
 
-                // Set the selected table 
-                document.getElementById('tableSelect').value = tableSelect;
+                // Set the selected table
+                //document.getElementById('tableSelect').value = tableSelect;
                 populateRowAndColumnSelects();
 
-                // Set the selected row and column 
+                // Set the selected row and column
                 document.getElementById('rowSelect').value = rowName;
                 document.getElementById('colSelect').value = colName;
             }
         }
 
         function editCell() {
-            const tableSelect = document.getElementById('tableSelect').value;
+            //const tableSelect = document.getElementById('tableSelect').value;
             const rowName = document.getElementById('rowSelect').value;
             const colName = document.getElementById('colSelect').value;
             const text = document.getElementById('cellText').value;
             const color = document.getElementById('cellColor').value;
 
+            // Determine which table the selected column belongs to  
+            const table1Columns = Array.from(document.getElementById('shiftTable1').rows[0].cells).map(cell => cell.innerText);
+
+            //const table2Columns = Array.from(document.getElementById('shiftTable2').rows[0].cells).map(cell => cell.innerText);
+            
             let table = document.getElementById('shiftTable1');
-
-            // Select the appropriate table based on user choice  
-            if (tableSelect === "2") {
+            if (table1Columns.includes(colName)) {
+                tableSelect = '1';
+                table = document.getElementById('shiftTable1');
+            } else {
+                tableSelect = '2';
                 table = document.getElementById('shiftTable2');
-            }
+            } 
 
-            // Get row index from row name  
+            // Get row index from row name
             const rowIndex = Array.from(table.rows).findIndex(row => row.cells[0].innerText === rowName);
-            // Get column index from column name  
+            // Get column index from column name
             const colIndex = Array.from(table.rows[0].cells).findIndex(cell => cell.innerText === colName);
 
-            // Check if the row and column are valid  
+            // Check if the row and column are valid
             if (rowIndex > 0 && colIndex > 0) {
                 const cell = table.rows[rowIndex].cells[colIndex];
-                if (text) cell.innerText = text; // Update cell text  
-                if (color) cell.style.backgroundColor = color; // Update cell background color 
-                
-                // Change text color to black if background is red or yellow  
+                if (text) cell.innerText = text; // Update cell text
+                if (color) cell.style.backgroundColor = color; // Update cell background color
+
+                // Change text color to black if background is red or yellow
                 if (color === 'red' || color === 'yellow') {
-                    cell.style.color = 'black'; // Set text color to black  
+                    cell.style.color = 'black'; // Set text color to black
                 } else {
-                    // Optionally reset to default or another color if other backgrounds are used  
-                    cell.style.color = ''; // Reset to default  
+                    // Optionally reset to default or another color if other backgrounds are used
+                    cell.style.color = ''; // Reset to default
                 }
             }
         }
+
+        function populateFileTable(files) {
+            const fileTableBody = document.getElementById('fileTable').getElementsByTagName('tbody')[0];
+            fileTableBody.innerHTML = ""; // Clear existing rows
+
+            files.forEach(file => {
+                const row = fileTableBody.insertRow();
+                const cell1 = row.insertCell(0);
+                const cell2 = row.insertCell(1);
+                cell1.innerText = file.name;
+                cell2.innerText = file.creationTime;
+                cell1.style.border = '1px solid #fff'; // Styling  
+                cell2.style.border = '1px solid #fff'; // Styling  
+            });
+        }
+
+        // Sample usage  
+        const files = [
+            { name: "run_e4_010107_2024-11-29.04-50.root", creationTime: "2023-10-01 12:00" },
+            { name: "run_e4_010105_2024-11-29.01-16.root", creationTime: "2023-10-02 14:30" }
+        ];
+        populateFileTable(files);
+
     </script>
 
 </body>
