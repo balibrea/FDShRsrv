@@ -6,6 +6,11 @@
     <style>
         body {
             font-family: "Lato", sans-serif;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: 100vh;
+            margin: 0;
         }
 
         /* Sidebar Styles */
@@ -57,8 +62,32 @@
         }
 
         #main {
-            transition: margin-left .5s;
             padding: 16px;
+            margin-bottom: 150px;
+            /* Match the height of the #info-frame */
+            transition: margin-left .5s;
+
+            display: flex;
+            flex-direction: column;
+            /* Stack items vertically */
+            height: 100%;
+            /* Full height of the viewport */
+        }
+
+        .body {
+            flex: 1;
+            /* Take remaining space between menu and status bar */
+            /*background-color: #f1f1f1;  Light grey background for body */
+            padding: 20px;
+            /* Padding for body content */
+            display: flex;
+            /* Optional: use flex for inner content */
+            justify-content: center;
+            /* Center content horizontally */
+            align-items: center;
+            /* Center content vertically */
+            flex-direction: column;
+            /* Stack items vertically */
         }
 
         table,
@@ -67,9 +96,21 @@
             border: 1px solid black;
             border-collapse: collapse;
         }
-        .green { background-color: green; color: white; }
-        .red { background-color: red; color: black; }
-        .yellow { background-color: yellow; color: black;}
+
+        .green {
+            background-color: green;
+            color: rgb(7, 7, 7);
+        }
+
+        .red {
+            background-color: red;
+            color: black;
+        }
+
+        .yellow {
+            background-color: yellow;
+            color: black;
+        }
 
         table {
             margin: 0 auto;
@@ -81,12 +122,19 @@
         }
 
         td {
-            max-width: 80px; /* Establece un ancho máximo */
-            white-space: pre-wrap; /* Permite texto multilinea */
-            word-wrap: break-word; /* Permite el ajuste de palabras largas */
-            overflow: hidden; /* Oculta el desbordamiento */
-            padding: 2px; /* Espaciado interno */
-            text-overflow: ellipsis; /* Agrega puntos suspensivos si el texto es demasiado largo */
+            color: black;
+            max-width: 80px;
+            /* Establece un ancho máximo */
+            white-space: pre-wrap;
+            /* Permite texto multilinea */
+            word-wrap: break-word;
+            /* Permite el ajuste de palabras largas */
+            overflow: hidden;
+            /* Oculta el desbordamiento */
+            padding: 2px;
+            /* Espaciado interno */
+            text-overflow: ellipsis;
+            /* Agrega puntos suspensivos si el texto es demasiado largo */
         }
 
         td:hover {
@@ -105,8 +153,10 @@
 
         /* Split the screen in half vertically */
         .split {
-            height: 50%; /* Each section takes half the height */
-            width: 25%; /* Full width */
+            height: 50%;
+            /* Each section takes half the height */
+            width: 25%;
+            /* Full width */
             position: fixed;
             z-index: 1;
             top: 0;
@@ -116,14 +166,18 @@
 
         /* Control the top side */
         .top {
-            top: 0; /* Aligns to the top */
-            background-color: #252424; /* Dark background for the top section */
+            top: 0;
+            /* Aligns to the top */
+            background-color: #252424;
+            /* Dark background for the top section */
         }
 
         /* Control the bottom side */
         .bottom {
-            bottom: 0; /* Aligns to the bottom */
-            background-color: rgb(233, 116, 7); /* Red background for the bottom section */
+            bottom: 0;
+            /* Aligns to the bottom */
+            background-color: rgb(233, 116, 7);
+            /* Red background for the bottom section */
         }
 
         /* If you want the content centered horizontally and vertically */
@@ -142,11 +196,108 @@
         }
 
         #fileTable td {
-            white-space: nowrap; /* Prevents word wrapping */
-            overflow: hidden; /* Hides overflow text */
-            text-overflow: ellipsis; /* Shows ellipsis for overflowed text */
-            padding: 5px; /* Adds some padding */
-            border: 1px solid #fff; /* Border color for cells */
+            white-space: nowrap;
+            /* Prevents word wrapping */
+            overflow: hidden;
+            /* Hides overflow text */
+            text-overflow: ellipsis;
+            /* Shows ellipsis for overflowed text */
+            padding: 5px;
+            /* Adds some padding */
+            border: 1px solid #fff;
+            /* Border color for cells */
+        }
+
+        .context-menu {
+            position: absolute;
+            display: none;
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+        }
+
+        .context-menu button {
+            display: block;
+            width: 100%;
+            padding: 8px;
+            border: none;
+            background: none;
+            text-align: left;
+            cursor: pointer;
+        }
+
+        .context-menu button:hover {
+            background-color: #f0f0f0;
+        }
+
+        /* Menu Bar */
+        .menu {
+            background-color: #f7f1e5;
+            padding: 10px;
+            display: flex;
+            /* Use flexbox for alignment */
+            justify-content: space-between;
+            /* Space between left and right contents */
+            align-items: center;
+            /* Center the contents vertically */
+        }
+
+        .menu select,
+        .menu button {
+            padding: 5px;
+            /* Reduced padding for thinner appearance */
+            margin: 0 5px;
+            /* Margin remains the same */
+            font-size: 14px;
+            /* Reduced font size */
+        }
+
+        .menu button {
+            background-color: #3b3f3b;
+            /* Button color */
+            color: white;
+            /* Button text color */
+            border: none;
+            /* No border */
+            cursor: pointer;
+            /* Pointer cursor */
+        }
+
+        .menu button:hover {
+            background-color: #45a049;
+            /* Button hover color */
+        }
+
+        #info-frame {
+            position: relative;
+            /* Relative to the #content container */
+            bottom: 0;
+            /* Align at the bottom of #content */
+            width: 100%;
+            background-color: #f9f9f9;
+            border-top: 1px solid #ccc;
+            max-height: 150px;
+            overflow-y: auto;
+            box-sizing: border-box;
+            display: none;
+            /* Initially hidden */
+        }
+
+        #file-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        #file-table th,
+        #file-table td {
+            border: 1px solid #ccc;
+            padding: 8px;
+            text-align: left;
+        }
+
+        #file-table th {
+            background-color: #f4f4f4;
         }
     </style>
 </head>
@@ -155,19 +306,19 @@
 
     <div id="mySidebar" class="sidebar">
         <a href="javascript:void(0)" class="closebtn" onclick="closeNav()">×</a>
-            
+
         <!-- Top Section for Current Information -->
         <div style="padding: 10px; background-color: #222; color: #fff;">
             <h3 style="color: #818181; padding-left: 32px;">Shift Day</h3>
             <label for="rowSelect" style="color: #818181; padding-left: 32px;">FD Building:</label>
             <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
-    
+
             <label for="colSelect" style="color: #818181; padding-left: 32px;">Shift Day:</label>
             <select id="colSelect" style="margin-left: 32px;"></select><br><br>
-    
+
             <label for="cellText" style="color: #818181; padding-left: 32px;">Text:</label>
             <input type="text" id="cellText"><br><br>
-    
+
             <label for="cellColor" style="color: #818181; padding-left: 32px;">Background Color:</label>
             <select id="cellColor" style="margin-left: 32px;">
                 <option value="">Select color</option>
@@ -175,11 +326,11 @@
                 <option value="yellow">Yellow</option>
                 <option value="green">Green</option>
             </select><br><br>
-    
+
             <button onclick="editCell()" style="margin-left: 32px;">Edit Cell</button>
         </div>
-        
-    
+
+
         <!-- Bottom Section for Created Files -->
         <div style="padding: 10px; background-color: #e7a20e; color: #050505; margin-top: 10px;">
             <h4 style="text-align: center;">Created Files</h4>
@@ -207,58 +358,104 @@
     </div>
 
     <div id="main">
-        <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>
-        <h2 style="text-align: center;">FD Shifts Days Status</h2>
 
+        <!-- Menu Bar -->
+        <div class="menu">
+            <button class="openbtn" onclick="toggleNav()">☰ Open/Close Sidebar</button>
 
-        {% for t in range(table_cnt) %}
-        <p style="text-align: center;">Shift period from {{ dates[t] }}</p>
+            <h2 style="text-align: center; margin: auto;">FD Shifts Status</h2>
 
-        <table id="shiftTable{{t+1}}" onclick="handleTableClick(event)">
-            <colgroup>
-                <col span="2" style="background-color: lightblue">
-                <col span="3" style="background-color: green">
-            </colgroup>
+            <div class="menu-right">
+                <label for="dateSelect">Select Date:</label>
+                <select id="dateSelect">
+                    <option value="2023-12-20">December 20, 2023</option>
+                    <option value="2023-12-21">December 21, 2023</option>
+                    <option value="2023-12-22">December 22, 2023</option>
+                    <option value="2023-12-23">December 23, 2023</option>
+                    <option value="2023-12-24">December 24, 2023</option>
+                    <option value="2023-12-25">December 25, 2023</option>
+                    <option value="2023-12-26">December 26, 2023</option>
+                    <option value="2023-12-27">December 27, 2023</option>
+                    <option value="2023-12-28">December 28, 2023</option>
+                </select>
+                <button onclick="saveDate()">Save</button>
+            </div>
+        </div>
 
-            <thead>
-                <tr>
-                    <th> </th>
-                    {% if t < (table_cnt -1) %}
-                        {% for col in days[t * MAX_COL : (t + 1) * MAX_COL] %}
+        <div class="body">
+
+            {% for t in range(table_cnt) %}
+            <p style="text-align: center;">Shift period from {{ dates[t] }}</p>
+
+            <table id="shiftTable{{t+1}}" onclick="handleTableClick(event)">
+                <colgroup>
+                    <col span="2" style="background-color: lightblue">
+                    <col span="3" style="background-color: green">
+                </colgroup>
+
+                <thead>
+                    <tr>
+                        <th> </th>
+                        {% if t < (table_cnt -1) %} {% for col in days[t * MAX_COL : (t + 1) * MAX_COL] %} <th>{{ col }}
+                            </th>
+                            {% endfor %}
+
+                            {% else %}
+                            {% for col in days[t * MAX_COL : ] %}
                             <th>{{ col }}</th>
-                        {% endfor %}
+                            {% endfor %}
 
-                    {% else %}
-                        {% for col in days[t * MAX_COL : ] %}
-                            <th>{{ col }}</th>
-                        {% endfor %}
+                            {% endif %}
+                    </tr>
+                </thead>
 
-                    {% endif %}
-                </tr>
-            </thead>
-
-            <tbody>
-                {% for shift, statuses in data.items() %}
-                <tr>
-                    <td>{{ shift }}</td>
-                    {% if t < 1 %}
-                    {% for status in statuses[:MAX_COL] %}
-                        <td class="{{ status[1] }}">{{ status[0] }}</td>
+                <tbody>
+                    {% for shift, statuses in data.items() %}
+                    <tr>
+                        <td>{{ shift }}</td>
+                        {% if t < 1 %} {% for status in statuses[:MAX_COL] %} <td class="{{ status[1] }}">{{ status[0]
+                            }}</td>
+                            {% endfor %}
+                            {% else %}
+                            {% for status in statuses[MAX_COL:] %}
+                            <td class="{{ status[1] }}">{{ status[0] }}</td>
+                            {% endfor %}
+                            {% endif%}
+                    </tr>
                     {% endfor %}
-                    {% else %}
-                    {% for status in statuses[MAX_COL:] %}
-                        <td class="{{ status[1] }}">{{ status[0] }}</td>
-                    {% endfor %}
-                    {% endif%}
-                </tr>
-                {% endfor %}
-            </tbody>
+                </tbody>
 
-        </table>
+            </table>
 
-        {% endfor %}
+            {% endfor %}
+
+        </div>
 
 
+        <div id="info-frame">
+            <h3>Files Associated with Selected Cell</h3>
+            <table id="file-table">
+                <thead>
+                    <tr>
+                        <th>File Name</th>
+                        <th>Size</th>
+                        <th>Last Modified</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="3" style="text-align: center;">Click on a cell to view associated files.</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+    </div>
+
+    <div id="context-menu" class="context-menu">
+        <button onclick="changeColor('red')">Red</button>
+        <button onclick="changeColor('green')">Green</button>
+        <button onclick="changeColor('yellow')">Yellow</button>
     </div>
 
     <script>
@@ -351,11 +548,11 @@
             const text = document.getElementById('cellText').value;
             const color = document.getElementById('cellColor').value;
 
-            // Determine which table the selected column belongs to  
+            // Determine which table the selected column belongs to
             const table1Columns = Array.from(document.getElementById('shiftTable1').rows[0].cells).map(cell => cell.innerText);
 
             //const table2Columns = Array.from(document.getElementById('shiftTable2').rows[0].cells).map(cell => cell.innerText);
-            
+
             let table = document.getElementById('shiftTable1');
             if (table1Columns.includes(colName)) {
                 tableSelect = '1';
@@ -363,7 +560,7 @@
             } else {
                 tableSelect = '2';
                 table = document.getElementById('shiftTable2');
-            } 
+            }
 
             // Get row index from row name
             const rowIndex = Array.from(table.rows).findIndex(row => row.cells[0].innerText === rowName);
@@ -396,12 +593,12 @@
                 const cell2 = row.insertCell(1);
                 cell1.innerText = file.name;
                 cell2.innerText = file.creationTime;
-                cell1.style.border = '1px solid #fff'; // Styling  
-                cell2.style.border = '1px solid #fff'; // Styling  
+                cell1.style.border = '1px solid #fff'; // Styling
+                cell2.style.border = '1px solid #fff'; // Styling
             });
         }
 
-        // Sample usage  
+        // Sample usage
         const files = [
             { name: "run_e4_010107_2024-11-29.04-50.root", creationTime: "2023-10-01 12:00" },
             { name: "run_e4_010105_2024-11-29.01-16.root", creationTime: "2023-10-02 14:30" }
