@@ -460,7 +460,12 @@
 
     <script>
         let isOpen = false; // Track the sidebar state
-        let tableSelect = '1';
+        let tableSelect = "1";
+        const tables = ["shiftTable1", "shiftTable2"];
+        const contextMenu = document.getElementById("context-menu");
+        const infoFrame = document.getElementById("info-frame");
+        const fileTableBody = document.querySelector("#file-table tbody");
+        let currentCell;
 
         function toggleNav() {
             if (isOpen) {
@@ -599,11 +604,113 @@
         }
 
         // Sample usage
-        const files = [
+        const filesData = [
             { name: "run_e4_010107_2024-11-29.04-50.root", creationTime: "2023-10-01 12:00" },
             { name: "run_e4_010105_2024-11-29.01-16.root", creationTime: "2023-10-02 14:30" }
         ];
-        populateFileTable(files);
+        populateFileTable(filesData);
+
+        tables.forEach((tableId) => {
+            const table = document.getElementById(tableId);
+
+            // Make cells editable on double-click
+            table.addEventListener("dblclick", (e) => {
+                if (e.target.tagName === "TD") {
+                    e.target.contentEditable = true;
+                    e.target.focus();
+
+                    // Add blur event to make cell non-editable
+                    e.target.addEventListener("blur", () => {
+                        e.target.contentEditable = false; // Make the cell non-editable
+                    });
+
+                    // Optional: Allow to save changes with Enter key
+                    e.target.addEventListener("keypress", (event) => {
+                        if (event.key === "Enter") {
+                            e.target.blur(); // Trigger the blur event on Enter key
+                        }
+                    });
+                }
+            });
+
+            // Show context menu on right-click
+            table.addEventListener("contextmenu", (e) => {
+                e.preventDefault();
+                if (e.target.tagName === "TD") {
+                    currentCell = e.target;
+                    contextMenu.style.top = `${e.pageY}px`;
+                    contextMenu.style.left = `${e.pageX}px`;
+                    contextMenu.style.display = "block";
+                }
+            });
+
+            // Update file table on cell click and show the frame
+            table.addEventListener("click", (e) => {
+                if (e.target.tagName === "TD") {
+                    const cellRow = e.target.parentElement.rowIndex;
+                    const cellCol = e.target.cellIndex;
+
+                    const key = `${cellRow}-${cellCol}`;
+                    const files = filesData[key] || [];
+
+                    // Clear previous file data
+                    fileTableBody.innerHTML = "";
+
+                    if (files.length === 0) {
+                        fileTableBody.innerHTML = `
+                                <tr>
+                                    <td colspan="3" style="text-align: center;">No files associated with this cell.</td>
+                                </tr>`;
+                    } else {
+                        files.forEach((file) => {
+                            const row = document.createElement("tr");
+                            row.innerHTML = `
+                                    <td>${file.name}</td>
+                                    <td>${file.size}</td>
+                                    <td>${file.modified}</td>`;
+                            fileTableBody.appendChild(row);
+                        });
+                    }
+
+                    // Show the info frame
+                    infoFrame.style.display = "block";
+                }
+            });
+        });
+
+        // Hide info frame when clicking outside of both tables or the context menu
+        document.addEventListener("click", (e) => {
+            const isClickInsideTable = tables.some((tableId) => {
+                const table = document.getElementById(tableId);
+                return table.contains(e.target);
+            });
+
+            if (!isClickInsideTable && !contextMenu.contains(e.target)) {
+                infoFrame.style.display = "none";
+            }
+        });
+
+        // Hide context menu on click elsewhere
+        document.addEventListener("click", () => {
+            contextMenu.style.display = "none";
+        });
+
+        // Change background color of the selected cell
+        function changeColor(color) {
+            if (currentCell) {
+                currentCell.style.backgroundColor = color;
+            }
+
+            // Change text color to black if background is red or yellow
+            if (color === "red" || color === "yellow") {
+                currentCell.style.color = "black"; // Set text color to black
+            } else {
+                // Optionally reset to default or another color if other backgrounds are used
+                currentCell.style.color = ""; // Reset to default
+            }
+
+            contextMenu.style.display = "none";
+        }
 
     </script>
 

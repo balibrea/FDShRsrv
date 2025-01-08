@@ -25,11 +25,11 @@ def shift_days(init_date, end_date):
 
     days = []
 
-    now = start  
+    now = start
     while now <= end:
-        # Formatear la fecha y agregarla a la lista  
+        # Formatear la fecha y agregarla a la lista
         days.append(now.strftime("%m-%d"))
-        # Avanzar un día  
+        # Avanzar un día
         now += timedelta(days=1)
 
         # Populate data (text, color)
@@ -37,26 +37,26 @@ def shift_days(init_date, end_date):
         t = ("", "green")
         for i in range(5):
             shift_data[d[i]].append(t)
-    
+
     return days
 
 
 def get_date_period_name(start_date, end_date):
-    # Month names for formatting  
+    # Month names for formatting
     month_names = [
         "", "January", "February", "March", "April", "May", "June",
         "July", "August", "September", "October", "November", "December"
     ]
-    
-    # Split the input dates into month and day  
+
+    # Split the input dates into month and day
     start_month, start_day = map(int, start_date.split('-'))
     end_month, end_day = map(int, end_date.split('-'))
-    
-    # Get the month names  
+
+    # Get the month names
     start_month_name = month_names[start_month]
     end_month_name = month_names[end_month]
-    
-    # Format the day suffixes  
+
+    # Format the day suffixes
     def format_day_suffix(day):
         if day in [1, 21, 31]:
             return f"{day}st"
@@ -66,8 +66,8 @@ def get_date_period_name(start_date, end_date):
             return f"{day}rd"
         else:
             return f"{day}th"
-    
-    # Construct the output  
+
+    # Construct the output
     if start_month == end_month:
         return f"{start_month_name} {format_day_suffix(start_day)} to {format_day_suffix(end_day)}"
     else:
@@ -85,8 +85,8 @@ else:
     dates = get_date_period_name(days[0], days[-1])
 
 # DEBUG
-print(days)
-print(shift_data)
+#print(days)
+#print(shift_data)
 
 @app.route('/')
 def home():
