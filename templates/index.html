@@ -310,6 +310,10 @@
         <!-- Top Section for Current Information -->
         <div style="padding: 10px; background-color: #222; color: #fff;">
             <h3 style="color: #818181; padding-left: 32px;">Shift Day</h3>
+            <label>
+                <input type="checkbox" id="show-info-checkbox">
+                Show Info Frame
+            </label><br><br>
             <label for="rowSelect" style="color: #818181; padding-left: 32px;">FD Building:</label>
             <select id="rowSelect" style="margin-left: 32px;"></select><br><br>
 
@@ -461,6 +465,7 @@
         const contextMenu = document.getElementById("context-menu");
         const infoFrame = document.getElementById("info-frame");
         const fileTableBody = document.querySelector("#file-table tbody");
+        const showInfoCheckbox = document.getElementById('show-info-checkbox');
         let currentCell;
 
         function toggleNav() {
@@ -642,7 +647,7 @@
 
             // Update file table on cell click and show the frame
             table.addEventListener("click", (e) => {
-                if (e.target.tagName === "TD") {
+                if (showInfoCheckbox.checked && e.target.tagName === "TD") {
                     const cellRow = e.target.parentElement.rowIndex;
                     const cellCol = e.target.cellIndex;
 
@@ -710,7 +715,7 @@
 
         // Add an event listener for when the select value changes
         document.getElementById('dateSelect').addEventListener('change', function() {
-            const selectedShift = this.value;
+            const selectedShift = this.selectedIndex;
 
             // Send the selected value to the server via AJAX
             fetch('/', {
@@ -723,10 +728,20 @@
             .then(response => response.json())
             .then(data => {
                 console.log("Response from server:", data);
-                //alert(`Selected Shift: ${data.selected_shift}`);
+                if (data.status === 'success') {
+                    // Reload the page after successfully processing the POST request
+                    window.location.reload();
+                }
             })
             .catch(error => console.error('Error:', error));
         });
+
+        // Define the pre-selected shift (this will be passed from Flask as a template variable)
+        const selectedShift = "{{ selected_shift }}";
+
+        // Set the value of the select element
+        const dateSelect = document.getElementById("dateSelect");
+        dateSelect.selectedIndex = selectedShift;
 
     </script>
 

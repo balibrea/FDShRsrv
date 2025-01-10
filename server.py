@@ -1,4 +1,4 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, redirect, url_for
 from datetime import datetime, timedelta
 
 import sqlite3
@@ -157,18 +157,24 @@ def get_shift_data(selected_shift):
 shifts = fetch_shifts()
 
 # Defaulft selected shift
-selected_shift = -1 # last shift
+selected_shift = len(shifts) -1 # last shift
 
 # Get days list
 #days = shift_days(START, END)
 shift_data, days = get_shift_data(shifts[selected_shift])
 
-# Calculate the number of tables
-if len(days) > MAX_COL:
-    table_cnt = 2
-    dates = [get_date_period_name(days[0], days[MAX_COL-1]), get_date_period_name(days[MAX_COL], days[-1])]
-else:
-    dates = get_date_period_name(days[0], days[-1])
+def calculate_tables():
+    global table_cnt
+    global dates
+
+    # Calculate the number of tables
+    if len(days) > MAX_COL:
+        table_cnt = 2
+        dates = [get_date_period_name(days[0], days[MAX_COL-1]), get_date_period_name(days[MAX_COL], days[-1])]
+    else:
+        dates = get_date_period_name(days[0], days[-1])
+
+calculate_tables()
 
 # DEBUG
 #print(shift_data)
@@ -185,19 +191,37 @@ print(days)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
+    global selected_shift
+    global shift_data
+    global days
 
     if request.method == 'POST':
         # Handle the selected value sent via AJAX
         selected_shift = request.json.get('selected_shift')
         print(f"################ Shift period: {selected_shift} #################")  # Use the value here
-        return jsonify({"status": "success", "selected_shift": selected_shift})
+
+        shift_data, days = get_shift_data(shifts[selected_shift])
+        calculate_tables()
+        
+        #return jsonify({"status": "success", "selected_shift": selected_shift})
+        #return redirect(url_for('home'))
+        # Return updated table data and days as JSON
+        return jsonify({
+            "status": "success",
+            "shift_data": shift_data,
+            "days": days
+        }) 
+
     
-    return render_template('index.html', data=shift_data,
+    return render_template('index.html',
+        data=shift_data,
         table_cnt = table_cnt, 
         days = days, 
         dates = dates, 
         MAX_COL = MAX_COL,
-        shifts = shifts)
+        shifts = shifts,
+        selected_shift = selected_shift
+    )
 
 if __name__ == '__main__':
     app.run(debug=True)

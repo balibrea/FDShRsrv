@@ -82,7 +82,7 @@ def create_database():
     conn.close()
     print("Database and tables created successfully.")
 
-def populate_database(dates, status="run OK", color="green"):
+def populate_database(dates, status=" ", color="green"):
     conn = sqlite3.connect('fd_status.db')
     cursor = conn.cursor()
 
@@ -138,7 +138,7 @@ def add_shift(start_date, end_date):
     print(f"Shift from {start_date} to {end_date} added successfully.")
     
 
-def create_new_shift(start_date, end_date, status="run OK", color="green"):
+def create_new_shift(start_date, end_date, status=" ", color="green"):
     conn = sqlite3.connect('fd_status.db')
     cursor = conn.cursor()
 
@@ -190,10 +190,11 @@ if __name__ == "__main__":
 
     #populate_database(dates)
 
-    create_new_shift("2024-09-22", "2024-10-09")
+    # Create shifts periods, last day not added
+    create_new_shift("2024-09-22", "2024-10-08")
 
-    create_new_shift("2024-10-22", "2024-11-07")
+    create_new_shift("2024-10-22", "2024-11-06")
 
-    create_new_shift("2024-11-20", "2024-12-07")
+    create_new_shift("2024-11-20", "2024-12-06")
 
-    create_new_shift("2024-12-22", "2025-01-08")
+    create_new_shift("2024-12-22", "2025-01-07")
