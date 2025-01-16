@@ -153,6 +153,27 @@ def get_shift_data(selected_shift):
     return shift_data, date_list
 
 
+def get_day_id_from_index(index, table_index):
+    # Calculate the day offset based on the table index and column index
+    day_offset = table_index * MAX_COL + index
+
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    # Query the days table to find the matching day_id
+    cursor.execute('''
+        SELECT id FROM days
+        ORDER BY id LIMIT 1 OFFSET ?;
+    ''', (day_offset,))
+    result = cursor.fetchone()
+    conn.close()
+
+    if result:
+        return result[0]
+    else:
+        raise ValueError(f"No matching day_id found for index {index} and table {table_index}")
+
+
 # Get shifts list
 shifts = fetch_shifts()
 
@@ -186,8 +207,8 @@ calculate_tables()
 #for key, value in shift_data.items():
     #print(f"{key}: {value}")
 
-print("\nDate List:")
-print(days)
+#print("\nDate List:")
+#print(days)
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -222,6 +243,48 @@ def home():
         shifts = shifts,
         selected_shift = selected_shift
     )
+
+
+@app.route('/save', methods=['POST'])
+def save_data():
+    try:
+        # Retrieve the table data from the frontend
+        table_data = request.json.get('tableData')
+
+        print(table_data)
+
+        # Open database connection
+        conn = sqlite3.connect('fd_status.db')
+        cursor = conn.cursor()
+
+        # Process each entry in table data
+        for entry in table_data:
+            shift = entry['shift']
+            statuses = entry['statuses']
+
+            for i, status in enumerate(statuses):
+                # Find the day_id based on the column index and shift period
+                day_id = get_day_id_from_index(i, entry['tableIndex'])
+
+                # Update or insert the fd_status record for the given day and FD name
+                cursor.execute('''
+                    INSERT INTO fd_statuses (day_id, fd_name, status, color)
+                    VALUES (?, ?, ?, ?)
+                    ON CONFLICT(day_id, fd_name) DO UPDATE SET
+                        status = excluded.status,
+                        color = excluded.color;
+                ''', (day_id, shift, status['text'], status['color']))
+
+        # Commit the changes to the database
+        conn.commit()
+        conn.close()
+
+        return jsonify({"status": "success"})
+    except Exception as e:
+        print("Error saving data:", e)
+        return jsonify({"status": "error", "message": str(e)})
+
+
 
 if __name__ == '__main__':
     app.run(debug=True)

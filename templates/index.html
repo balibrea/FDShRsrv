@@ -696,22 +696,27 @@
             contextMenu.style.display = "none";
         });
 
-        // Change background color of the selected cell
-        function changeColor(color) {
-            if (currentCell) {
-                currentCell.style.backgroundColor = color;
-            }
+        // Change background color by updating the class
+function changeColor(color) {
+    if (currentCell) {
+        // Remove existing color-related classes
+        currentCell.classList.remove("red", "yellow", "green");
 
-            // Change text color to black if background is red or yellow
-            if (color === "red" || color === "yellow") {
-                currentCell.style.color = "black"; // Set text color to black
-            } else {
-                // Optionally reset to default or another color if other backgrounds are used
-                currentCell.style.color = ""; // Reset to default
-            }
+        // Add the new color class
+        currentCell.classList.add(color);
 
-            contextMenu.style.display = "none";
+        // Adjust text color based on the background class
+        if (color === "red" || color === "yellow") {
+            currentCell.style.color = "black"; // Set text color to black for better visibility
+        } else {
+            currentCell.style.color = ""; // Reset to default
         }
+    }
+
+    // Hide the context menu
+    contextMenu.style.display = "none";
+}
+
 
         // Add an event listener for when the select value changes
         document.getElementById('dateSelect').addEventListener('change', function() {
@@ -742,6 +747,49 @@
         // Set the value of the select element
         const dateSelect = document.getElementById("dateSelect");
         dateSelect.selectedIndex = selectedShift;
+
+        function saveDate() {
+            const tables = document.querySelectorAll('[id^="shiftTable"]'); // Select all tables with IDs starting with 'shiftTable'
+            const tableData = [];
+
+            // Loop through each table and extract data
+            tables.forEach((table, tableIndex) => {
+                const rows = table.querySelectorAll('tbody tr');
+                rows.forEach(row => {
+                    const shift = row.querySelector('td:first-child').innerText; // First column is the shift name
+                    const statuses = Array.from(row.querySelectorAll('td:not(:first-child)')).map(cell => ({
+                        text: cell.innerText,
+                        color: cell.className, // Assuming class names represent the color
+                    }));
+
+                    tableData.push({
+                        shift,
+                        statuses,
+                        tableIndex,
+                    });
+                });
+            });
+
+            console.log("Collected Table Data:", tableData);
+
+            // Send the collected data to the server via AJAX
+            fetch('/save', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ tableData }),
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'success') {
+                        alert('Data saved successfully!');
+                    } else {
+                        alert('Failed to save data!');
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
 
     </script>
 
