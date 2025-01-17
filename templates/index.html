@@ -378,7 +378,7 @@
                     {% endfor %}
             
                 </select>
-                <button onclick="saveDate()">Save</button>
+                <button onclick="collectTableData()">Save</button>
             </div>
         </div>
 
@@ -697,25 +697,25 @@
         });
 
         // Change background color by updating the class
-function changeColor(color) {
-    if (currentCell) {
-        // Remove existing color-related classes
-        currentCell.classList.remove("red", "yellow", "green");
+        function changeColor(color) {
+            if (currentCell) {
+                // Remove existing color-related classes
+                currentCell.classList.remove("red", "yellow", "green");
 
-        // Add the new color class
-        currentCell.classList.add(color);
+                // Add the new color class
+                currentCell.classList.add(color);
 
-        // Adjust text color based on the background class
-        if (color === "red" || color === "yellow") {
-            currentCell.style.color = "black"; // Set text color to black for better visibility
-        } else {
-            currentCell.style.color = ""; // Reset to default
+                // Adjust text color based on the background class
+                if (color === "red" || color === "yellow") {
+                    currentCell.style.color = "black"; // Set text color to black for better visibility
+                } else {
+                    currentCell.style.color = ""; // Reset to default
+                }
+            }
+
+            // Hide the context menu
+            contextMenu.style.display = "none";
         }
-    }
-
-    // Hide the context menu
-    contextMenu.style.display = "none";
-}
 
 
         // Add an event listener for when the select value changes
@@ -791,6 +791,61 @@ function changeColor(color) {
                 .catch(error => console.error('Error:', error));
         }
 
+        function collectTableData() {
+            const tableIds = ["shiftTable1", "shiftTable2"]; // IDs of the two tables
+            const data = {};
+
+            tableIds.forEach(tableId => {
+                const table = document.getElementById(tableId);
+                const rows = table.querySelectorAll("tbody tr");
+
+                rows.forEach(row => {
+                    const cells = row.querySelectorAll("td");
+                    const detector = cells[0].innerText.trim(); // First cell is the detector name (e.g., LL, LM, etc.)
+
+                    // Initialize the detector key in the dictionary if it doesn't exist
+                    if (!data[detector]) {
+                        data[detector] = [];
+                    }
+
+                    for (let i = 1; i < cells.length; i++) { // Skip the first cell (detector name)
+                        const cell = cells[i];
+                        const text = cell.innerText.trim();
+                        const color = cell.className || "green"; // Assume "green" if no class is present
+                        data[detector].push([text, color]);
+                    }
+                });
+            });
+
+            console.log(data);
+
+            // Send the data to the backend
+            fetch('/save-data', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    alert('Data saved successfully!');
+                } else {
+                    alert('Failed to save data!');
+                }
+            })
+            .catch(error => console.error('Error:', error));
+
+            //.then(response => response.json())
+            //.then(result => {
+              //  console.log('Data saved:', result);
+            //}).catch(error => {
+              //  console.error('Error saving data:', error);
+             //});
+        }
+
+    
     </script>
 
 </body>

@@ -210,6 +210,75 @@ calculate_tables()
 #print("\nDate List:")
 #print(days)
 
+print(shifts)
+
+def save_fd_data_to_db(selected_shift, fd_data):
+    # Parse the selected shift
+    start_date_str, end_date_str = selected_shift.split(" to ")
+    start_date = datetime.strptime(start_date_str, "%Y-%m-%d")
+    end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
+
+    # Connect to SQLite database
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    # Function to insert or fetch year ID
+    def get_or_create_year(year):
+        cursor.execute('SELECT id FROM years WHERE year = ?', (year,))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        cursor.execute('INSERT INTO years (year) VALUES (?)', (year,))
+        return cursor.lastrowid
+
+    # Function to insert or fetch month ID
+    def get_or_create_month(year_id, month):
+        cursor.execute('SELECT id FROM months WHERE year_id = ? AND month = ?', (year_id, month))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        cursor.execute('INSERT INTO months (year_id, month) VALUES (?, ?)', (year_id, month))
+        return cursor.lastrowid
+
+    # Function to insert or fetch day ID
+    def get_or_create_day(month_id, day):
+        cursor.execute('SELECT id FROM days WHERE month_id = ? AND day = ?', (month_id, day))
+        row = cursor.fetchone()
+        if row:
+            return row[0]
+        cursor.execute('INSERT INTO days (month_id, day) VALUES (?, ?)', (month_id, day))
+        return cursor.lastrowid
+
+    # Iterate through each date in the selected shift range
+    current_date = start_date
+    while current_date <= end_date:
+        year = current_date.year
+        month = current_date.month
+        day = current_date.day
+
+        # Get or create the year, month, and day in the database
+        year_id = get_or_create_year(year)
+        month_id = get_or_create_month(year_id, month)
+        day_id = get_or_create_day(month_id, day)
+
+        # Insert FD data for this day
+        for fd_name, statuses in fd_data.items():
+            # Match the index of the current date to the corresponding status
+            index = (current_date - start_date).days
+            if index < len(statuses):  # Ensure we don't go out of bounds
+                status, color = statuses[index]
+                cursor.execute('''
+                    INSERT OR REPLACE INTO fd_statuses (day_id, fd_name, status, color)
+                    VALUES (?, ?, ?, ?)
+                ''', (day_id, fd_name, status, color))
+
+        current_date += timedelta(days=1)
+
+    # Commit and close connection
+    conn.commit()
+    conn.close()
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     global selected_shift
@@ -246,7 +315,7 @@ def home():
 
 
 @app.route('/save', methods=['POST'])
-def save_data():
+def save_data0():
     try:
         # Retrieve the table data from the frontend
         table_data = request.json.get('tableData')
@@ -284,6 +353,17 @@ def save_data():
         print("Error saving data:", e)
         return jsonify({"status": "error", "message": str(e)})
 
+
+@app.route('/save-data', methods=['POST'])
+def save_data():
+    data = request.json
+    print(data)  # Process or save the data as needed
+
+    # Save the data to the database
+    save_fd_data_to_db(shifts[selected_shift], data)
+
+    #return jsonify({'message': 'Data saved successfully!', 'data': data})
+    return jsonify({"status": "success"})
 
 
 if __name__ == '__main__':
