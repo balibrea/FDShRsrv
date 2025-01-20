@@ -1,0 +1,4 @@
+Traceback (most recent call last):
+  File "/home/auger/FDShRsrv/server.py", line 1, in <module>
+    from flask import Flask, render_template, request, jsonify, redirect, url_for
+ModuleNotFoundError: No module named 'flask'

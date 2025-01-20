@@ -314,46 +314,6 @@ def home():
     )
 
 
-@app.route('/save', methods=['POST'])
-def save_data0():
-    try:
-        # Retrieve the table data from the frontend
-        table_data = request.json.get('tableData')
-
-        print(table_data)
-
-        # Open database connection
-        conn = sqlite3.connect('fd_status.db')
-        cursor = conn.cursor()
-
-        # Process each entry in table data
-        for entry in table_data:
-            shift = entry['shift']
-            statuses = entry['statuses']
-
-            for i, status in enumerate(statuses):
-                # Find the day_id based on the column index and shift period
-                day_id = get_day_id_from_index(i, entry['tableIndex'])
-
-                # Update or insert the fd_status record for the given day and FD name
-                cursor.execute('''
-                    INSERT INTO fd_statuses (day_id, fd_name, status, color)
-                    VALUES (?, ?, ?, ?)
-                    ON CONFLICT(day_id, fd_name) DO UPDATE SET
-                        status = excluded.status,
-                        color = excluded.color;
-                ''', (day_id, shift, status['text'], status['color']))
-
-        # Commit the changes to the database
-        conn.commit()
-        conn.close()
-
-        return jsonify({"status": "success"})
-    except Exception as e:
-        print("Error saving data:", e)
-        return jsonify({"status": "error", "message": str(e)})
-
-
 @app.route('/save-data', methods=['POST'])
 def save_data():
     data = request.json
@@ -367,4 +327,4 @@ def save_data():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(host="0.0.0.0")
