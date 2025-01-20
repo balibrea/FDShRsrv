@@ -7,11 +7,11 @@ def shift_days(init_date, end_date):
 
     days = []
 
-    now = start  
+    now = start
     while now <= end:
-        # Formatear la fecha y agregarla a la lista  
+        # Formatear la fecha y agregarla a la lista
         days.append(now.strftime("%Y-%m-%d"))
-        # Avanzar un día  
+        # Avanzar un día
         now += timedelta(days=1)
 
     print(days)
@@ -136,7 +136,7 @@ def add_shift(start_date, end_date):
     conn.commit()
     conn.close()
     print(f"Shift from {start_date} to {end_date} added successfully.")
-    
+
 
 def create_new_shift(start_date, end_date, status=" ", color="green"):
     conn = sqlite3.connect('fd_status.db')
@@ -149,7 +149,7 @@ def create_new_shift(start_date, end_date, status=" ", color="green"):
     # Ensure years, months, and days are in the database
     for date in dates:
         year, month, day = map(int, date.split('-'))
-        
+
 
         # Insert year
         cursor.execute('INSERT OR IGNORE INTO years (year) VALUES (?)', (year,))
@@ -191,10 +191,12 @@ if __name__ == "__main__":
     #populate_database(dates)
 
     # Create shifts periods, last day not added
-    create_new_shift("2024-09-22", "2024-10-08")
+    # ~ create_new_shift("2024-09-22", "2024-10-08")
 
-    create_new_shift("2024-10-22", "2024-11-06")
+    # ~ create_new_shift("2024-10-22", "2024-11-06")
 
-    create_new_shift("2024-11-20", "2024-12-06")
+    # ~ create_new_shift("2024-11-20", "2024-12-06")
 
-    create_new_shift("2024-12-22", "2025-01-07")
+    # ~ create_new_shift("2024-12-22", "2025-01-07")
+
+    create_new_shift("2025-01-23", "2025-02-05")
