@@ -199,4 +199,10 @@ if __name__ == "__main__":
 
     # ~ create_new_shift("2024-12-22", "2025-01-07")
 
-    create_new_shift("2025-01-23", "2025-02-05")
+#    create_new_shift("2025-01-23", "2025-02-05")
+#    create_new_shift("2025-02-21", "2025-03-07")
+#    create_new_shift("2025-03-22", "2025-04-05")
+#    create_new_shift("2025-04-19", "2025-05-05")
+#    create_new_shift("2025-05-18", "2025-06-04")
+
+    create_new_shift("2025-06-16", "2025-07-03")
