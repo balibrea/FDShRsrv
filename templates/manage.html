@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manage Shifts</title>
+</head>
+<body>
+    <h1>Manage Shifts</h1>
+
+    {% if message %}
+        <p><strong>{{ message }}</strong></p>
+    {% endif %}
+
+    <h2>Create a New Shift</h2>
+    <form method="POST">
+        <label for="start_date">Start date (YYYY-MM-DD):</label>
+        <input type="date" name="start_date" required><br><br>
+
+        <label for="end_date">End date (YYYY-MM-DD):</label>
+        <input type="date" name="end_date" required><br><br>
+
+        <input type="hidden" name="action" value="create">
+        <input type="submit" value="Create Shift">
+    </form>
+
+    <hr>
+
+    <h2>Delete Existing Shift</h2>
+    <form method="POST">
+        <label for="shift_to_delete">Select a shift to delete:</label>
+        <select name="shift_to_delete">
+            {% for shift in shifts %}
+                <option value="{{ shift }}">{{ shift }}</option>
+            {% endfor %}
+        </select><br><br>
+
+        <input type="hidden" name="action" value="delete">
+        <input type="submit" value="Delete Shift" onclick="return confirm('Are you sure you want to delete this shift?');">
+    </form>
+
+    <hr>
+
+    <a href="{{ url_for('home') }}">Back to home</a>
+</body>
+</html>
