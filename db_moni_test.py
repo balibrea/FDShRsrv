@@ -82,6 +82,7 @@ def create_database():
     conn.close()
     print("Database and tables created successfully.")
 
+
 def populate_database(dates, status=" ", color="green"):
     conn = sqlite3.connect('fd_status.db')
     cursor = conn.cursor()
@@ -179,6 +180,81 @@ def create_new_shift(start_date, end_date, status=" ", color="green"):
     print("Database populated successfully.")
 
 
+def delete_shift(start_date, end_date):
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    # Delete the shift entry
+    cursor.execute('''
+        DELETE FROM shifts
+        WHERE start_year = ? AND start_month = ? AND start_day = ?
+          AND end_year = ? AND end_month = ? AND end_day = ?
+    ''', (*map(int, start_date.split('-')), *map(int, end_date.split('-'))))
+
+    # Get all dates in the shift
+    dates = shift_days(start_date, end_date)
+
+    for date in dates:
+        year, month, day = map(int, date.split('-'))
+
+        # Get year_id
+        cursor.execute('SELECT id FROM years WHERE year = ?', (year,))
+        year_row = cursor.fetchone()
+        if not year_row:
+            continue
+        year_id = year_row[0]
+
+        # Get month_id
+        cursor.execute('SELECT id FROM months WHERE year_id = ? AND month = ?', (year_id, month))
+        month_row = cursor.fetchone()
+        if not month_row:
+            continue
+        month_id = month_row[0]
+
+        # Get day_id
+        cursor.execute('SELECT id FROM days WHERE month_id = ? AND day = ?', (month_id, day))
+        day_row = cursor.fetchone()
+        if not day_row:
+            continue
+        day_id = day_row[0]
+
+        # Delete FD statuses for this day
+        cursor.execute('DELETE FROM fd_statuses WHERE day_id = ?', (day_id,))
+        # Delete the day entry
+        cursor.execute('DELETE FROM days WHERE id = ?', (day_id,))
+
+    # Optionally, clean up months and years with no days/months left
+    cursor.execute('DELETE FROM months WHERE id NOT IN (SELECT month_id FROM days)')
+    cursor.execute('DELETE FROM years WHERE id NOT IN (SELECT year_id FROM months)')
+
+    conn.commit()
+    conn.close()
+    print(f"Shift from {start_date} to {end_date} deleted successfully.")
+
+
+def list_shifts():
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT start_year, start_month, start_day, end_year, end_month, end_day
+        FROM shifts
+        ORDER BY start_year, start_month, start_day
+    ''')
+    shifts = cursor.fetchall()
+    conn.close()
+
+    if not shifts:
+        print("No shifts found.")
+        return
+
+    print("Shifts in database:")
+    for shift in shifts:
+        start = f"{shift[0]:04d}-{shift[1]:02d}-{shift[2]:02d}"
+        end = f"{shift[3]:04d}-{shift[4]:02d}-{shift[5]:02d}"
+        print(f"  {start} to {end}")
+
+
 if __name__ == "__main__":
     create_database()
 
@@ -205,4 +281,6 @@ if __name__ == "__main__":
 #    create_new_shift("2025-04-19", "2025-05-05")
 #    create_new_shift("2025-05-18", "2025-06-04")
 
-    create_new_shift("2025-06-16", "2025-07-03")
+    # ~ create_new_shift("2025-06-16", "2025-07-03")
+
+    list_shifts()
