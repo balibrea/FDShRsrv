@@ -256,7 +256,7 @@ def list_shifts():
 
 
 if __name__ == "__main__":
-    create_database()
+    #create_database()
 
     # Example list of dates
     '''
@@ -283,4 +283,8 @@ if __name__ == "__main__":
 
     # ~ create_new_shift("2025-06-16", "2025-07-03")
 
+    list_shifts()
+    create_new_shift("2025-07-16", "2025-08-02")
+    list_shifts()
+    delete_shift("2025-07-16", "2025-08-02")
     list_shifts()

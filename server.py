@@ -47,6 +47,23 @@ def shift_days(init_date, end_date):
     return days
 
 
+def shift_dates(init_date, end_date):
+    start = datetime.strptime(init_date, "%Y-%m-%d")
+    end = datetime.strptime(end_date, "%Y-%m-%d")
+
+    days = []
+
+    now = start
+    while now <= end:
+        # Formatear la fecha y agregarla a la lista
+        days.append(now.strftime("%Y-%m-%d"))
+        # Avanzar un día
+        now += timedelta(days=1)
+
+    print(days)
+    return days
+
+
 def get_date_period_name(start_date, end_date):
     # Month names for formatting
     month_names = [
@@ -279,6 +296,144 @@ def save_fd_data_to_db(selected_shift, fd_data):
     conn.close()
 
 
+def add_shift(start_date, end_date):
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    # Parse start and end dates
+    start_year, start_month, start_day = map(int, start_date.split('-'))
+    end_year, end_month, end_day = map(int, end_date.split('-'))
+
+    # Insert shift data
+    cursor.execute('''
+        INSERT INTO shifts (start_year, start_month, start_day, end_year, end_month, end_day)
+        VALUES (?, ?, ?, ?, ?, ?)
+    ''', (start_year, start_month, start_day, end_year, end_month, end_day))
+
+    # Commit and close connection
+    conn.commit()
+    conn.close()
+    print(f"Shift from {start_date} to {end_date} added successfully.")
+
+
+def create_new_shift(start_date, end_date, status=" ", color="green"):
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    add_shift(start_date, end_date)
+
+    dates = shift_dates(start_date, end_date)
+
+    print(dates)
+
+    # Ensure years, months, and days are in the database
+    for date in dates:
+        year, month, day = map(int, date.split('-'))
+
+
+        # Insert year
+        cursor.execute('INSERT OR IGNORE INTO years (year) VALUES (?)', (year,))
+        cursor.execute('SELECT id FROM years WHERE year = ?', (year,))
+        year_id = cursor.fetchone()[0]
+
+        # Insert month
+        cursor.execute('INSERT OR IGNORE INTO months (year_id, month) VALUES (?, ?)', (year_id, month))
+        cursor.execute('SELECT id FROM months WHERE year_id = ? AND month = ?', (year_id, month))
+        month_id = cursor.fetchone()[0]
+
+        # Insert day
+        cursor.execute('INSERT OR IGNORE INTO days (month_id, day) VALUES (?, ?)', (month_id, day))
+        cursor.execute('SELECT id FROM days WHERE month_id = ? AND day = ?', (month_id, day))
+        day_id = cursor.fetchone()[0]
+
+        # Insert FD statuses for all detectors
+        for fd in ["LL", "LM", "LA", "CO", "HE"]:
+            cursor.execute('''
+                INSERT OR IGNORE INTO fd_statuses (day_id, fd_name, status, color)
+                VALUES (?, ?, ?, ?)
+            ''', (day_id, fd, status, color))
+
+    # Commit changes
+    conn.commit()
+    conn.close()
+    print("Database populated successfully.")
+
+
+def delete_shift(start_date, end_date):
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    # Delete the shift entry
+    cursor.execute('''
+        DELETE FROM shifts
+        WHERE start_year = ? AND start_month = ? AND start_day = ?
+          AND end_year = ? AND end_month = ? AND end_day = ?
+    ''', (*map(int, start_date.split('-')), *map(int, end_date.split('-'))))
+
+    # Get all dates in the shift
+    dates = shift_dates(start_date, end_date)
+
+    print(dates)
+
+    for date in dates:
+        year, month, day = map(int, date.split('-'))
+
+        # Get year_id
+        cursor.execute('SELECT id FROM years WHERE year = ?', (year,))
+        year_row = cursor.fetchone()
+        if not year_row:
+            continue
+        year_id = year_row[0]
+
+        # Get month_id
+        cursor.execute('SELECT id FROM months WHERE year_id = ? AND month = ?', (year_id, month))
+        month_row = cursor.fetchone()
+        if not month_row:
+            continue
+        month_id = month_row[0]
+
+        # Get day_id
+        cursor.execute('SELECT id FROM days WHERE month_id = ? AND day = ?', (month_id, day))
+        day_row = cursor.fetchone()
+        if not day_row:
+            continue
+        day_id = day_row[0]
+
+        # Delete FD statuses for this day
+        cursor.execute('DELETE FROM fd_statuses WHERE day_id = ?', (day_id,))
+        # Delete the day entry
+        cursor.execute('DELETE FROM days WHERE id = ?', (day_id,))
+
+    # Optionally, clean up months and years with no days/months left
+    cursor.execute('DELETE FROM months WHERE id NOT IN (SELECT month_id FROM days)')
+    cursor.execute('DELETE FROM years WHERE id NOT IN (SELECT year_id FROM months)')
+
+    conn.commit()
+    conn.close()
+    print(f"Shift from {start_date} to {end_date} deleted successfully.")
+
+
+def list_shifts():
+    conn = sqlite3.connect('fd_status.db')
+    cursor = conn.cursor()
+
+    cursor.execute('''
+        SELECT start_year, start_month, start_day, end_year, end_month, end_day
+        FROM shifts
+        ORDER BY start_year, start_month, start_day
+    ''')
+    shifts = cursor.fetchall()
+    conn.close()
+
+    result = []
+    for shift in shifts:
+        start = f"{shift[0]:04d}-{shift[1]:02d}-{shift[2]:02d}"
+        end = f"{shift[3]:04d}-{shift[4]:02d}-{shift[5]:02d}"
+        result.append({"start": start, "end": end})
+        print(f"  {start} to {end}")
+    return result
+
+
 @app.route('/', methods=['GET', 'POST'])
 def home():
     global selected_shift
@@ -324,6 +479,25 @@ def save_data():
 
     #return jsonify({'message': 'Data saved successfully!', 'data': data})
     return jsonify({"status": "success"})
+
+
+@app.route("/shifts", methods=["GET", "POST"])
+def manage_shifts():
+    if request.method == "POST":
+        start_date = request.form["start_date"]
+        end_date = request.form["end_date"]
+        create_new_shift(start_date, end_date, color="green")
+        return redirect(url_for("manage_shifts"))
+
+    shifts = list_shifts()
+    return render_template("shifts.html", shifts=shifts)
+
+@app.route("/delete_shift", methods=["POST"])
+def remove_shift():
+    start_date = request.form["start_date"]
+    end_date = request.form["end_date"]
+    delete_shift(start_date, end_date)
+    return redirect(url_for("manage_shifts"))
 
 
 if __name__ == '__main__':

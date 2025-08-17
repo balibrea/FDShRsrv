@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Manage Shifts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 30px auto;
+    }
+    h1 {
+      text-align: center;
+    }
+    .shift-list {
+      list-style: none;
+      padding: 0;
+    }
+    .shift-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: #f4f4f4;
+      margin: 5px 0;
+      padding: 10px;
+      border-radius: 6px;
+    }
+    .shift-item form {
+      margin: 0;
+    }
+    .delete-btn {
+      background: #d9534f;
+      color: white;
+      border: none;
+      padding: 5px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .delete-btn:hover {
+      background: #c9302c;
+    }
+    .new-shift {
+      margin-top: 20px;
+      padding: 15px;
+      background: #e9ecef;
+      border-radius: 6px;
+    }
+    .new-shift input {
+      margin: 5px;
+      padding: 5px;
+    }
+    .add-btn {
+      background: #5cb85c;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .add-btn:hover {
+      background: #4cae4c;
+    }
+  </style>
+</head>
+<body>
+  <h1>Shifts Management</h1>
+
+  <ul class="shift-list">
+    {% for shift in shifts %}
+      <li class="shift-item">
+        <span>{{ shift.start }} → {{ shift.end }}</span>
+        <form method="POST" action="{{ url_for('remove_shift') }}">
+          <input type="hidden" name="start_date" value="{{ shift.start }}">
+          <input type="hidden" name="end_date" value="{{ shift.end }}">
+          <button type="submit" class="delete-btn">Delete</button>
+        </form>
+      </li>
+    {% endfor %}
+  </ul>
+
+  <div class="new-shift">
+    <h3>Create New Shift</h3>
+    <form method="POST" action="{{ url_for('manage_shifts') }}">
+      <label>Start Date:</label>
+      <input type="date" name="start_date" required>
+      <label>End Date:</label>
+      <input type="date" name="end_date" required>
+      <button type="submit" class="add-btn">Add Shift</button>
+    </form>
+  </div>
+</body>
+</html>
