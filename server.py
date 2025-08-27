@@ -1,13 +1,27 @@
 from flask import Flask, render_template, request, jsonify, redirect, url_for
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, date
+
+from apscheduler.schedulers.background import BackgroundScheduler
 
 import sqlite3
 
+import os
+
+import subprocess
+
 app = Flask(__name__)
 
-START = "2024-12-20"
-END = "2025-01-7"
+START = date(2025, 8, 14)
+END = date(2025, 8, 31)
+
 MAX_COL = 9
+
+DB_FILE = 'fd_status.db'
+
+INPUT_BASE = "/Raid/data/Prod/v2r0/Hybrid"
+OUTPUT_DIR = "/home/auger/CurrentShift"
+
+file_statuses = []
 
 table_cnt = 1
 dates = []
@@ -21,7 +35,7 @@ shift_data = {
 }
 
 def get_db_connection():
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -98,7 +112,7 @@ def get_date_period_name(start_date, end_date):
 
 
 def fetch_shifts():
-    conn = sqlite3.connect('fd_status.db') # Connect to the database
+    conn = sqlite3.connect(DB_FILE) # Connect to the database
     cursor = conn.cursor()
     cursor.execute('SELECT start_year, start_month, start_day, end_year, end_month, end_day FROM shifts')
     shifts = cursor.fetchall()
@@ -122,7 +136,7 @@ def get_shift_data(selected_shift):
                  for i in range((end_date - start_date).days + 1)]
 
     # Connect to the database
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     # Prepare the shift_data dictionary
@@ -174,7 +188,7 @@ def get_day_id_from_index(index, table_index):
     # Calculate the day offset based on the table index and column index
     day_offset = table_index * MAX_COL + index
 
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     # Query the days table to find the matching day_id
@@ -236,7 +250,7 @@ def save_fd_data_to_db(selected_shift, fd_data):
     end_date = datetime.strptime(end_date_str, "%Y-%m-%d")
 
     # Connect to SQLite database
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     # Function to insert or fetch year ID
@@ -297,7 +311,7 @@ def save_fd_data_to_db(selected_shift, fd_data):
 
 
 def add_shift(start_date, end_date):
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     # Parse start and end dates
@@ -317,7 +331,7 @@ def add_shift(start_date, end_date):
 
 
 def create_new_shift(start_date, end_date, status=" ", color="green"):
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     add_shift(start_date, end_date)
@@ -360,7 +374,7 @@ def create_new_shift(start_date, end_date, status=" ", color="green"):
 
 
 def delete_shift(start_date, end_date):
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     # Delete the shift entry
@@ -414,7 +428,7 @@ def delete_shift(start_date, end_date):
 
 
 def list_shifts():
-    conn = sqlite3.connect('fd_status.db')
+    conn = sqlite3.connect(DB_FILE)
     cursor = conn.cursor()
 
     cursor.execute('''
@@ -430,9 +444,113 @@ def list_shifts():
         start = f"{shift[0]:04d}-{shift[1]:02d}-{shift[2]:02d}"
         end = f"{shift[3]:04d}-{shift[4]:02d}-{shift[5]:02d}"
         result.append({"start": start, "end": end})
-        print(f"  {start} to {end}")
+        #print(f"  {start} to {end}")
     return result
 
+def run_reconstruction(date_str: str):
+    """
+    Runs the offline reconstruction script if userAugerOffline is not already running.
+    date_str must be in format YYYY-MM-DD
+
+    Launch reconstruction for a given date using a detached screen session.
+    """
+    try:
+        # Check if userAugerOffline is already running
+        result = subprocess.run(
+            ["pgrep", "-x", "userAugerOffline"],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE
+        )
+        if result.returncode == 0:
+            print("⚠️ userAugerOffline is already running. Skipping reconstruction.")
+            return False
+        
+        # Run the reconstruction script
+        # Call the bash script with the given date
+        #result = subprocess.run(
+        #    ["bash", "offlinereconstr.sh", date_str],
+        #    capture_output=True,
+        #    text=True,
+        #    check=True
+        #)
+        #return result.stdout
+    
+        session_name = f"recon_{date_str.replace('-', '')}"
+
+        # Check if screen session already exists
+        check = subprocess.run(
+            ["screen", "-list"],
+            capture_output=True,
+            text=True
+        )
+
+        if session_name in check.stdout:
+            return f"Reconstruction already running in screen session: {session_name}"
+        
+        # Run the bash script inside a new detached screen
+        cmd = [
+            "screen", "-dmS", session_name,
+            "bash", "-c", "./offlineHybRec.sh {date_str}"
+        ]
+
+        subprocess.run(cmd, check=True)
+
+        return f"Started reconstruction in detached screen session: {session_name}"
+    
+    
+    except subprocess.CalledProcessError as e:
+        print("Error during reconstruction:", e.stderr)
+        return None
+
+
+def check_files(start=START, end=END):
+    """Check source/output files between START_DATE and END_DATE."""
+    global file_statuses
+    file_statuses = []   # clear before refresh
+
+    current_date = start
+    while current_date <= end:
+        year, month, day = current_date.strftime("%Y"), current_date.strftime("%m"), current_date.strftime("%d")
+
+        input_file = f"{INPUT_BASE}/{year}/{month}/hd_{year}_{month}_{day}_12h00.root"
+        output_file = f"{OUTPUT_DIR}/ADST_hyb_{year}_{month}_{day}.root"
+
+
+        if os.path.exists(input_file):
+            print(f"File {input_file} exists.")
+            if os.path.exists(output_file):
+                status = "ready"
+                print(f"File {output_file} exists.")
+            else:
+                status = "source available, not processed"
+
+                # Run reconstruction
+                run_reconstruction("{year}-{month}-{day}")
+                
+                status = "source available, processing..."
+
+                print(f"File {output_file} does not exist, processing...")
+        else:
+            status = "source not available"
+            print(f"File {input_file} does not exist.")
+
+        file_statuses.append({
+            "date": current_date.isoformat(),
+            "input": input_file,
+            "output": output_file,
+            "status": status,
+            "last_checked": datetime.now().strftime("%Y-%m-%d %H:%M")
+        })
+
+        current_date += timedelta(days=1)
+
+# Scheduler runs job every 2 hours
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=check_files, trigger="interval", hours=2)
+scheduler.start()
+
+
+################################# Web Routes ######################################
 
 @app.route('/', methods=['GET', 'POST'])
 def home():
@@ -492,6 +610,7 @@ def manage_shifts():
     shifts = list_shifts()
     return render_template("shifts.html", shifts=shifts)
 
+
 @app.route("/delete_shift", methods=["POST"])
 def remove_shift():
     start_date = request.form["start_date"]
@@ -500,5 +619,23 @@ def remove_shift():
     return redirect(url_for("manage_shifts"))
 
 
+@app.route("/offline")
+def show_files():
+    print("Last shift in database:")
+    #print(list_shifts()[-1])
+    print(shifts[-1])
+    s, e = shifts[-1].split(" to ")
+    s_y, s_m, s_d = s.split("-")
+    e_y, e_m, e_d = e.split("-")
+
+    START = datetime(int(s_y), int(s_m), int(s_d))
+    END = datetime(int(e_y), int(e_m), int(e_d))
+
+    # Run once at startup
+    check_files(START, END)
+    #print(file_statuses)
+    return render_template("offline_recon.html", rows=file_statuses)
+
+
 if __name__ == '__main__':
-    app.run(host="0.0.0.0")
+    app.run(host="0.0.0.0", debug=True)
