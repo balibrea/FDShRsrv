@@ -453,6 +453,12 @@ def run_reconstruction(date_str: str):
     date_str must be in format YYYY-MM-DD
 
     Launch reconstruction for a given date using a detached screen session.
+
+    Return codes:
+    - If userAugerOffline is already running: 1
+    - If a screen session for the reconstruction is already running: 2
+    - If the reconstruction is started successfully: 0
+    - If an error occurs during the process: -1
     """
     try:
         # Check if userAugerOffline is already running
@@ -463,7 +469,7 @@ def run_reconstruction(date_str: str):
         )
         if result.returncode == 0:
             print("⚠️ userAugerOffline is already running. Skipping reconstruction.")
-            return False
+            return 1
         
         # Run the reconstruction script
         # Call the bash script with the given date
@@ -475,7 +481,7 @@ def run_reconstruction(date_str: str):
         #)
         #return result.stdout
     
-        session_name = f"recon_{date_str.replace('-', '')}"
+        session_name = "yosel" #f"recon_{date_str.replace('-', '')}"
 
         # Check if screen session already exists
         check = subprocess.run(
@@ -485,22 +491,25 @@ def run_reconstruction(date_str: str):
         )
 
         if session_name in check.stdout:
-            return f"Reconstruction already running in screen session: {session_name}"
+            print(f"Reconstruction already running in screen session: {session_name}")
+            return 2
         
         # Run the bash script inside a new detached screen
         cmd = [
             "screen", "-dmS", session_name,
-            "bash", "-c", "./offlineHybRec.sh {date_str}"
+            "./offlineHybRec.sh", f"{date_str}"
         ]
 
+        print(date_str)
         subprocess.run(cmd, check=True)
 
-        return f"Started reconstruction in detached screen session: {session_name}"
+        print(f"Started reconstruction in detached screen session: {session_name}")
+        return 0
     
     
     except subprocess.CalledProcessError as e:
         print("Error during reconstruction:", e.stderr)
-        return None
+        return -1
 
 
 def check_files(start=START, end=END):
@@ -525,9 +534,16 @@ def check_files(start=START, end=END):
                 status = "source available, not processed"
 
                 # Run reconstruction
-                run_reconstruction("{year}-{month}-{day}")
-                
-                status = "source available, processing..."
+                st = run_reconstruction(f"{year}-{month}-{day}")
+
+                if st == 0:
+                    status = "source available, processing..."
+                elif st == 1:
+                    status = "userAugerOffline running, not started"
+                elif st == 2:
+                    status = "source available, processing......."
+                else:
+                    status = "error starting reconstruction"
 
                 print(f"File {output_file} does not exist, processing...")
         else:
@@ -621,6 +637,7 @@ def remove_shift():
 
 @app.route("/offline")
 def show_files():
+    global START, END
     print("Last shift in database:")
     #print(list_shifts()[-1])
     print(shifts[-1])
