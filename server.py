@@ -470,41 +470,31 @@ def run_reconstruction(date_str: str):
         if result.returncode == 0:
             print("⚠️ userAugerOffline is already running. Skipping reconstruction.")
             return 1
+        else:
+            session_name = "yosel" #f"recon_{date_str.replace('-', '')}"
+
+            # Check if screen session already exists
+            check = subprocess.run(
+                ["screen", "-list"],
+                capture_output=True,
+                text=True
+            )
+
+            if session_name in check.stdout:
+                print(f"Reconstruction already running in screen session: {session_name}")
+                return 2
         
-        # Run the reconstruction script
-        # Call the bash script with the given date
-        #result = subprocess.run(
-        #    ["bash", "offlinereconstr.sh", date_str],
-        #    capture_output=True,
-        #    text=True,
-        #    check=True
-        #)
-        #return result.stdout
-    
-        session_name = "yosel" #f"recon_{date_str.replace('-', '')}"
+            # Run the bash script inside a new detached screen
+            cmd = [
+                "screen", "-dmS", session_name,
+                "./offlineHybRec.sh", f"{date_str}"
+            ]
 
-        # Check if screen session already exists
-        check = subprocess.run(
-            ["screen", "-list"],
-            capture_output=True,
-            text=True
-        )
+            print(date_str)
+            subprocess.run(cmd, check=True)
 
-        if session_name in check.stdout:
-            print(f"Reconstruction already running in screen session: {session_name}")
-            return 2
-        
-        # Run the bash script inside a new detached screen
-        cmd = [
-            "screen", "-dmS", session_name,
-            "./offlineHybRec.sh", f"{date_str}"
-        ]
-
-        print(date_str)
-        subprocess.run(cmd, check=True)
-
-        print(f"Started reconstruction in detached screen session: {session_name}")
-        return 0
+            print(f"Started reconstruction in detached screen session: {session_name}")
+            return 0
     
     
     except subprocess.CalledProcessError as e:
@@ -531,7 +521,7 @@ def check_files(start=START, end=END):
                 status = "ready"
                 print(f"File {output_file} exists.")
             else:
-                status = "source available, not processed"
+                #status = "source available, not processed"
 
                 # Run reconstruction
                 st = run_reconstruction(f"{year}-{month}-{day}")
@@ -541,7 +531,7 @@ def check_files(start=START, end=END):
                 elif st == 1:
                     status = "userAugerOffline running, not started"
                 elif st == 2:
-                    status = "source available, processing......."
+                    status = "pending..."
                 else:
                     status = "error starting reconstruction"
 
