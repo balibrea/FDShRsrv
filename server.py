@@ -463,11 +463,13 @@ def run_reconstruction(date_str: str):
     try:
         # Check if userAugerOffline is already running
         result = subprocess.run(
-            ["pgrep", "-x", "userAugerOffline"],
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE
+            ["pgrep", "-fc", "userAugerOffline"],
+            capture_output=True,
+            text=True
+            #stdout=subprocess.PIPE,
+            #stderr=subprocess.PIPE
         )
-        if result.returncode == 0:
+        if int(result.stdout) != 0:
             print("⚠️ userAugerOffline is already running. Skipping reconstruction.")
             return 1
         else:
@@ -645,4 +647,4 @@ def show_files():
 
 
 if __name__ == '__main__':
-    app.run(host="0.0.0.0", debug=True)
+    app.run(host="0.0.0.0", debug=False)
