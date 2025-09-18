@@ -14,14 +14,14 @@ def main():
     if len(sys.argv) < 3:
         print("Warning, usage: python script.py <start_date YYYY-MM-DD> <stop_date YYYY-MM-DD> [filename]")
         #sys.exit(1)
-        start_str = "2025-09-12"
-        stop_str  = "2025-09-29"
+        start_str = "2025-08-14"
+        stop_str  = "2025-08-30"
     else:
 
         start_str = sys.argv[1]  # "2025-07-16"
         stop_str  = sys.argv[2]  # "2025-08-03"
     
-    filename  = "startstoptimes.inc"
+    filename  = "/home/auger/offline/analysis/startstoptimes.inc"
 
     gps_start = utc_to_gps(start_str)
     gps_stop  = utc_to_gps(stop_str)

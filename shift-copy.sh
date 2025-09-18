@@ -47,6 +47,7 @@ while [ "$(date -d "$current_date" +%Y-%m-%d)" != "$(date -d "$END_DATE + 1 day"
         if [ -f "$f" ]; then
             echo "Copying $f -> $DST_DIR"
             cp "$f" "$DST_DIR/"
+            rm "$f"  # Remove original file after copying
         fi
     done
 

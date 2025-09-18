@@ -629,7 +629,7 @@ def remove_shift():
 
 @app.route("/offline")
 def show_files():
-    global START, END
+    #global START, END
     print("Last shift in database:")
     #print(list_shifts()[-1])
     print(shifts[-1])
@@ -637,11 +637,13 @@ def show_files():
     s_y, s_m, s_d = s.split("-")
     e_y, e_m, e_d = e.split("-")
 
-    START = datetime(int(s_y), int(s_m), int(s_d))
-    END = datetime(int(e_y), int(e_m), int(e_d))
+    S = datetime(int(s_y), int(s_m), int(s_d))
+    E = datetime(int(e_y), int(e_m), int(e_d))
+
+    print(f"Check files from {S} to {E}")
 
     # Run once at startup
-    check_files(START, END)
+    check_files(S, E)
     #print(file_statuses)
     return render_template("offline_recon.html", rows=file_statuses)
 

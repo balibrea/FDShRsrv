@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>FD Data Browser</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    .day-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr); /* max 3 per row */
+      gap: 6px;
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+    .day-grid button {
+      font-size: 0.85rem;
+      padding: 6px;
+    }
+    .file-list {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
+  </style>
+</head>
+<body class="p-3">
+
+  <h2>Pierre Auger FD Data Browser</h2>
+
+  <!-- FD Tabs -->
+  <ul class="nav nav-tabs" id="fdTabs" role="tablist">
+    {% for fd in fds %}
+    <li class="nav-item" role="presentation">
+      <button class="nav-link {% if loop.first %}active{% endif %}" 
+              id="tab-{{ fd }}" 
+              data-bs-toggle="tab" 
+              data-bs-target="#fd-{{ fd }}" 
+              type="button" role="tab">
+        {{ fd }}
+      </button>
+    </li>
+    {% endfor %}
+  </ul>
+
+  <div class="tab-content mt-3">
+    {% for fd in fds %}
+    <div class="tab-pane fade {% if loop.first %}show active{% endif %}" id="fd-{{ fd }}" role="tabpanel">
+      <div class="row">
+        <!-- Left: Days (20%) -->
+        <div class="col-2">
+          <h5>Days</h5>
+          <div id="day-list-{{ fd }}" class="day-grid"></div>
+        </div>
+
+        <!-- Right: Files (80%) -->
+        <div class="col-10">
+          <h5>Files</h5>
+          <ul id="file-list-{{ fd }}" class="list-group file-list"></ul>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    // Example: preload for August 2025
+    const year = "2025";
+    const month = "08";
+
+    function loadDays(fd) {
+      fetch(`/list_days/${fd}/${year}/${month}`)
+        .then(r => r.json())
+        .then(days => {
+          const container = document.getElementById("day-list-" + fd);
+          container.innerHTML = "";
+          days.forEach(day => {
+            const btn = document.createElement("button");
+            btn.className = "btn btn-sm btn-primary";
+            btn.innerText = day;
+            btn.onclick = () => loadFiles(fd, year, month, day);
+            container.appendChild(btn);
+          });
+        });
+    }
+
+    function loadFiles(fd, year, month, day) {
+      fetch(`/list_files/${fd}/${year}/${month}/${day}`)
+        .then(r => r.json())
+        .then(files => {
+          const list = document.getElementById("file-list-" + fd);
+          list.innerHTML = "";
+          files.forEach(f => {
+            const li = document.createElement("li");
+            li.className = "list-group-item";
+            li.innerText = f;
+            list.appendChild(li);
+          });
+        });
+    }
+
+    // Load days for all FDs when page loads
+    document.addEventListener("DOMContentLoaded", () => {
+      {% for fd in fds %}
+      loadDays("{{ fd }}");
+      {% endfor %}
+    });
+  </script>
+</body>
+</html>
